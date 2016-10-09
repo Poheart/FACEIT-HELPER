@@ -3,12 +3,11 @@ var $scope = angular.element(document).scope();
 if($scope) {
 	if(localStorage.bPremium == "true") {
 		$scope.$on('USER_LOGGED_IN', function() {
-	    $scope.$root.currentUser.membership.type = "premium";
-	    $scope.$root.currentUser.membership.status = "active";
+		    $scope.$root.currentUser.membership.type = "premium";
+		    $scope.$root.currentUser.membership.status = "active";
 		});
 	}
 } else {
-	// Enable debug info
 	angular.reloadWithDebugInfo();
 }
 
@@ -16,11 +15,11 @@ if($scope) {
 					Array, Functions, variable declaration
 ***********************************************************************/
 var userSettings = {
-	bDebugMode: false,
-	bPremium: false,
+	bDebugMode: true,
 	bAutoAccept: false,
-	bAutoVeto: false,
 	bAutoCopy: false,
+	bAutoVeto: false,
+	bPremium: false,
 	bMatchedPlayers: false,
 	arrayMapOrder: { }
 }
@@ -53,75 +52,101 @@ var globalState = {
 			return globalState.user.currentState;
 		}
 	}
-} 
-var btnArray = {
-	btnid: ["btnAutoAccept", "btnAutoCopy", "btnAutoVeto", "btnPremium", "btnMatchedPlayers", "btnAutoJoin"],
+}
+var buttons = [
+	{
+		id: "btnAutoAccept",
+		icon: "icon-ic_check_generic",
+		text: "Auto-Accept ",
+		stateId: "sAutoAccept",
+		action: function() {
+			userSettings.bAutoAccept = !userSettings.bAutoAccept;
+			localStorage.bAutoAccept = userSettings.bAutoAccept;
 
-	btnIcon: ["icon-ic_check_generic", "icon-clipboard_icon", "icon-map",
-	 "icon-ic_verified_user_black_48px", "icon-ic_navigation_party_48px", "icon-ic_navigation_friends_48px"],
+			var txtState = userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		    $("#sAutoAccept").html(txtState);
+		}
+	},
+	{
+		id: "btnAutoCopy",
+		icon: "icon-clipboard_icon",
+		text: "Autocopy IP ",
+		stateId: "sAutoCopy",
+		action: function() {
+			userSettings.bAutoCopy = !userSettings.bAutoCopy;
+			localStorage.bAutoCopy = userSettings.bAutoCopy;
 
-	btnText: ["Auto-Accept ", "Autocopy IP ", "Auto-Veto ", "Premium ", "Show Matched Players ", "Auto-Join Server "],
+			var txtState = userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		    $("#sAutoCopy").html(txtState);
+		}
+	},
+	{
+		id: "btnAutoVeto",
+		icon: "icon-map",
+		text: "Auto-Veto ",
+		stateId: "sAutoVeto",
+		action: function() {
+			userSettings.bAutoVeto = !userSettings.bAutoVeto;
+			localStorage.bAutoVeto = userSettings.bAutoVeto;
 
-	btnStateID: ["sAutoAccept", "sAutoCopy", "sAutoVeto", "sPremium", "sMatchedPlayers", "sAutoJoin"],
+			var txtState = userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		    $("#sAutoVeto").html(txtState);
+		}
+	},
+	{
+		id: "btnPremium",
+		icon: "icon-ic_verified_user_black_48px",
+		text: "Premium ",
+		stateId: "sPremium",
+		action: function() {
+			userSettings.bPremium = !userSettings.bPremium;
+			localStorage.bPremium = userSettings.bPremium;
+			helper.sendNotification('<span class="text-info"><strong>'+
+			'Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br>'+
+			'</span>');
 
-	btnFunction: [ 
-			function() { // Auto Accept
-				userSettings.bAutoAccept = !userSettings.bAutoAccept;
-				// Save to HTML5 localStorage
-				localStorage.bAutoAccept = userSettings.bAutoAccept;
+			var txtState = userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		    $("#sPremium").html(txtState);
+		}
+	},
+	{
+		id: "btnMatchedPlayers",
+		icon: "icon-ic_navigation_party_48px",
+		text: "Show Matched Players ",
+		stateId: "sMatchedPlayers",
+		action: function() {
+			userSettings.bMatchedPlayers = !userSettings.bMatchedPlayers;
+			localStorage.bMatchedPlayers = userSettings.bMatchedPlayers;
 
-				btnArray.updateBtn();
-			},
-			function() { // Auto-Copy
-				userSettings.bAutoCopy = !userSettings.bAutoCopy;
-				// Save to HTML5 localStorage
-				localStorage.bAutoCopy = userSettings.bAutoCopy;
+			var txtState = userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		    $("#sMatchedPlayers").html(txtState);
+		}
+	},
+	{
+		id: "btnAutoJoin",
+		icon: "icon-ic_navigation_friends_48px",
+		text: "Auto-Join Server ",
+		stateId: "sAutoJoin",
+		action: function() {
+			userSettings.bAutoJoin = !userSettings.bAutoJoin;
+			localStorage.bAutoJoin = userSettings.bAutoJoin;
 
-				btnArray.updateBtn();
-			},
-			function() { // Auto-Veto
-				userSettings.bAutoVeto = !userSettings.bAutoVeto;
-				// Save to HTML5 localStorage
-				localStorage.bAutoVeto = userSettings.bAutoVeto;
-
-				btnArray.updateBtn();
-			},
-			function() { // Premium
-				userSettings.bPremium = !userSettings.bPremium;
-				// Save to HTML5 localStorage
-				localStorage.bPremium = userSettings.bPremium;
-				helperFunction.sendNotification('<span class="text-info"><strong>'+
-                'Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br>'+
-                '</span>');
-
-				btnArray.updateBtn();
-			},
-			function() { //  Matched Players
-				userSettings.bMatchedPlayers = !userSettings.bMatchedPlayers;
-				// Save to HTML5 localStorage
-				localStorage.bMatchedPlayers = userSettings.bMatchedPlayers;
-
-				btnArray.updateBtn();
-			},
-			function() { //  Auto Join Server
-				userSettings.bAutoJoin = !userSettings.bAutoJoin;
-				// Save to HTML5 localStorage
-				localStorage.bAutoJoin = userSettings.bAutoJoin;
-
-				if(userSettings.bAutoJoin) {
-					helperFunction.sendNotification('<strong><span class="text-success">'+
-                'Auto-Join Enabled</span><hr><small>The game will be launched via new Steam protocol connect command released on 10/6/2016'+
-                '<br>(Without causing FPS drop)</small>'+
-                '</strong>');
-				}
-
-				btnArray.updateBtn();
+			if(userSettings.bAutoJoin) {
+				helper.sendNotification('<strong><span class="text-success">'+
+			'Auto-Join Enabled</span><hr><small>The game will be launched via new Steam protocol connect command released on 10/6/2016'+
+			'<br>(Without causing FPS drop)</small>'+
+			'</strong>');
 			}
 
+			var txtState = userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		    $("#sAutoJoin").html(txtState);
+		}
+	}
+];
 
-	],
-
-	updateBtn: function() {
+var helper = {
+	UpdateButtons: function() {
+		// TODO: Remove this but make the thing that refeers to it work
 		var txtState;
 	    txtState = userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoAccept").html(txtState);
@@ -129,40 +154,31 @@ var btnArray = {
 	    txtState = userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoCopy").html(txtState);
 
+		txtState = userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		$("#sAutoVeto").html(txtState);
+
 	    txtState = userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sPremium").html(txtState);
-
-
-	    txtState = userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
-	    $("#sAutoVeto").html(txtState);
 
 	    txtState = userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sMatchedPlayers").html(txtState);
 
 	    txtState = userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoJoin").html(txtState);
-
-
-		}
-
-}
-
-var helperFunction = {
+	},
 	CopyToClipboard: function(text) {
 		document.dispatchEvent(new CustomEvent('FH_copyServerIP', {
 	        detail:  { serverIP : text }
 	    }));
-
 	},
 	AcceptMatch: function() {
 		// Some people reported checkIn(); will cause modal bug
 		// Using legacy method for now...
 		var acceptBtn = $('.modal-dialog__header__title[translate-once="MATCH-READY"]').parent().parent().find('button[translate-once="ACCEPT"]');
     	acceptBtn.click();
-    	helperFunction.sendNotification('<span class="text-info"><strong>'+
+    	helper.sendNotification('<span class="text-info"><strong>'+
                 'has accepted the match for you'+
                 '</span></strong>');
-
 	},
 	pageRefresh: function() {
 		angular.reloadWithDebugInfo();
@@ -178,19 +194,16 @@ var helperFunction = {
 			$scope.$root.$broadcast("NEW_GROWL", {message: '<div class="growl-text">'+
 	            ' <span ng-bind-html="::growl.message">'+ messages +'</div>'});
 		}
-
 	},
 	hideDialogBox: function() {
 		var btnContinue = $('.modal-dialog__header__title[translate-once="QUICK-MATCH-QUEUING"]').parent().parent().find('button[translate-once="CONTINUE"]');
         if(btnContinue != null && btnContinue.is(":visible")) {
             btnContinue.click();
-            helperFunction.sendNotification('<span class="text-warning"><strong>'+
+            helper.sendNotification('<span class="text-warning"><strong>'+
                 'is now queuing for a match...</strong><br>'+
                 '</span>');
         }
 		// You have been placed in queue..etc
-
-
 	},
 	appendPlayerList: function() {
 		if($('#player_list').length > 0 ) {
@@ -210,10 +223,10 @@ var helperFunction = {
 			}, "json");
 		}
 		setTimeout(function() {
-			helperFunction.timerCheckAcceptedPlayers(globalState.user.currentState);
+			helper.timerCheckAcceptedPlayers(globalState.user.currentState);
 		}, 1000);
 	},
-	timerCheckAcceptedPlayers: function(currentState) { 
+	timerCheckAcceptedPlayers: function(currentState) {
 		if(currentState != "CHECK_IN" && currentState != "WAITING") {
 			return;
 		}
@@ -240,11 +253,11 @@ var helperFunction = {
 		}, 200);
 	},
 	joinServer: function(serverIP) {
-			setTimeout(function() {
-				var StartParameter = "steam://rungame/730/76561202255233023/+connect%20" + serverIP;
-				debug.log("Triggering following address:" + StartParameter);
-				window.location = StartParameter;
-			}, 3000);
+		setTimeout(function() {
+			var StartParameter = "steam://rungame/730/76561202255233023/+connect%20" + serverIP;
+			debug.log("Triggering following address:" + StartParameter);
+			window.location = StartParameter;
+		}, 3000);
 	},
 	joinTimer: function(duration, serverIP) {
 	    var timer = duration, minutes, seconds;
@@ -256,13 +269,13 @@ var helperFunction = {
 	        	clearInterval(timerHandle);
 	        	// In case client changed their mind...
 	        	if(userSettings.bAutoJoin) {
-		        	helperFunction.sendNotification('<br><span class="text-success"><strong>'+
+		        	helper.sendNotification('<br><span class="text-success"><strong>'+
 			                        '<h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small>'+
 			                        '</strong>');
-		            helperFunction.joinServer(serverIP);
+		            helper.joinServer(serverIP);
 		            $("#joinWarning").html('<h2><strong class="text-success"><center>YOU WILL BE CONNECTED TO THE SERVER MOMENTARILY</center></strong></h2>');
 		        } else {
-		        	helperFunction.sendNotification('<br><span class="text-danger"><strong>'+
+		        	helper.sendNotification('<br><span class="text-danger"><strong>'+
 		                        '<h2>Auto-Join cancelled</h2></span>'+
 		                        '</strong>');
 		        	$("#joinWarning").html('<h2><strong class="text-danger"><center>AUTOJOIN CANCELLED</center></strong></h2>');
@@ -289,19 +302,19 @@ var helperFunction = {
 	}
 }
 
-
+// TODO: Set default in init?
 document.addEventListener('FH_returnMapsPreference', function(e) {
 	// if array is not set.
 	if(!e.detail.arrayMapOrder) {
 		// Give some default setting
 		userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>";
 	} else {
-	userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
+		userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 	}
 });
 
 var helperSetting = {
-	fetch: function() {
+	loadUserSettingsFromStorage: function() {
 		userSettings.bAutoAccept = localStorage.bAutoAccept == "true" ? true : false;
 		userSettings.bAutoCopy = localStorage.bAutoCopy == "true" ? true : false;
 		userSettings.bAutoVeto = localStorage.bAutoVeto == "true" ? true : false;
@@ -310,51 +323,42 @@ var helperSetting = {
 		userSettings.bAutoJoin = localStorage.bAutoJoin == "true" ? true : false;
 		// Fetch user map preferences
 		helperSetting.fetchMapPreference();
-
 	},
-	save: function() {
-
+	fetchMapPreference: function() {
+		document.dispatchEvent(new CustomEvent('FH_getMapsPreference'));
 	},
-	createButton: function() {
-		for (var i=0; i < btnArray.btnid.length;i++) {
-			var btnCreate = $('<li/>', { id: btnArray.btnid[i] })
+	createButtons: function() {
+		for (var i=0;i<buttons.length;i++) {
+			var btnCreate = $('<li/>', { id: buttons[i].id })
 				.append( $('<a/>')
-				.append( $('<i/>').addClass("main-navigation__icon").addClass(btnArray.btnIcon[i]) )
-				.append( $('<span/>', { class: 'main-navigation__name', text: btnArray.btnText[i] })
-				.append($('<span/>', { id: btnArray.btnStateID[i] }))))
+				.append( $('<i/>').addClass("main-navigation__icon").addClass(buttons[i].icon) )
+				.append( $('<span/>', { class: 'main-navigation__name', text: buttons[i].text })
+				.append($('<span/>', { id: buttons[i].stateId }))))
 				.attr('unselectable', 'on')
                 .css('user-select', 'none')
                 .on('selectstart', false);
 
 			$('.main-navigation ul[ng-controller="NavigationController"]').append(btnCreate);
-
-			btnCreate.bind("click", btnArray.btnFunction[i]);
-
-
+			btnCreate.bind("click",  buttons[i].action);
 		}
 		$('#helperDebug').bind("click", function() {
 			userSettings.bDebugMode = !userSettings.bDebugMode;
 			var Status = userSettings.bDebugMode ? 'enabled' : 'disabled';
-			helperFunction.sendNotification("Debuging mode " + Status + "!");
+			helper.sendNotification("Debuging mode " + Status + "!");
 		});
-		setTimeout(function() { btnArray.updateBtn(); }, 500);
-	},
-	fetchMapPreference: function() {
-		document.dispatchEvent(new CustomEvent('FH_getMapsPreference'));
+		setTimeout(function() { helper.UpdateButtons(); }, 500);
 	}
-
 }
-
 
 var eventStage = {
 	OnUserStateChange: function(currentState, lastState) {
 		// This function will be called when user stage changed from one to another
 		debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
-		helperFunction.sendNotification("<strong>eventStage</strong><br>NOW:" + currentState + "<BR>PAST:" +lastState, false, true);
+		helper.sendNotification("<strong>eventStage</strong><br>NOW:" + currentState + "<BR>PAST:" +lastState, false, true);
 		if(currentState == "CHECK_IN" || currentState == "WAITING") {
 			if(userSettings.bMatchedPlayers) {
 				setTimeout(function() {
-					helperFunction.appendPlayerList();
+					helper.appendPlayerList();
 				}, 1500);
 			}
 		}
@@ -362,101 +366,96 @@ var eventStage = {
 		// Perform action when under certain conditional
 		if(currentState == "IN_QUEUE") {
 			setTimeout(function() {
-				helperFunction.hideDialogBox();
+				helper.hideDialogBox();
 			}, 200);
 
 			if(lastState == "MATCH") {
-				helperFunction.sendNotification('<span class="text-danger"><strong>'+
+				helper.sendNotification('<span class="text-danger"><strong>'+
                 'will now refresh page to prevent match accept bug</strong><hr>'+
                 'Attempting page refresh now...'+
                 '</span>');
                 setTimeout(function() {
-                	helperFunction.pageRefresh();
+                	helper.pageRefresh();
                 }, 3000);
 			}
 		}
+
 		if(currentState == "CHECK_IN") {
 			if(userSettings.bAutoAccept) {
-				helperFunction.AcceptMatch();
+				helper.AcceptMatch();
 			}
 		}
 	},
 
 	OnMatchStateChange: function(currentState, lastState) {
 		// This function will be called when match state changed from one to another
-		helperFunction.sendNotification("<strong>eventStage</strong><br>NOW:" + currentState + "<BR>PAST:" +lastState, false, true);
+		helper.sendNotification("<strong>eventStage</strong><br>NOW:" + currentState + "<BR>PAST:" +lastState, false, true);
 		debug.log("eventStage CURRENT MATCHSTATE:" + currentState+ " & LAST:" + lastState);
 
 		if(currentState == "voting") {
 			// Re-fetch the user voting preferences again
 			helperSetting.fetchMapPreference();
 		}
+
 		if(currentState == "ready") {
 			if(userSettings.bAutoCopy) {
-				setTimeout(function() { 
+				setTimeout(function() {
 				var btnCopy = $('[clipboard]');
 				// Check if there is any IP for us to copy
 	                if(btnCopy.is(":visible") && btnCopy != null) {
 
 	                    var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text();
 	                    debug.log("ServerIP is " + serverIP);
-	                    helperFunction.CopyToClipboard(serverIP);
-	                    helperFunction.sendNotification('<br><span class="text-success"><strong>'+
+	                    helper.CopyToClipboard(serverIP);
+	                    helper.sendNotification('<br><span class="text-success"><strong>'+
 	                        'IP address copied to clipboard'+
 	                        '</span></strong>');
 	                }
 
             	}, 1000);
-
-			}
-			if(lastState == "configuring") {
-				if(userSettings.bAutoJoin) {
-					setTimeout(function() { 
-						var btnCopy = $('[clipboard]');
-						if(btnCopy.is(":visible") && btnCopy != null) {
-							$(".match-vs__details").append('<div id="joinWarning"><h2><strong><center>AUTO-JOIN SERVER IN <span id="autojoinTimer">10</span> SECONDS</center></strong></h2></div>');
-		                    var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text().replace("connect ", "");
-		                    debug.log("ServerIP is " + serverIP);
-		                    helperFunction.joinTimer(10, serverIP);
-	                	}
-					}, 1000);
-				}
 			}
 
+			if(lastState == "configuring" && userSettings.bAutoJoin) {
+				setTimeout(function() {
+					var btnCopy = $('[clipboard]');
+					if(btnCopy.is(":visible") && btnCopy != null) {
+						$(".match-vs__details").append('<div id="joinWarning"><h2><strong><center>AUTO-JOIN SERVER IN <span id="autojoinTimer">10</span> SECONDS</center></strong></h2></div>');
+						var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text().replace("connect ", "");
+						debug.log("ServerIP is " + serverIP);
+						helper.joinTimer(10, serverIP);
+					}
+				}, 1000);
+			}
 		}
+
 		if (currentState == "ongoing") {
-			helperFunction.sendNotification('<h2><span class="text-success"><strong>'+
-                        'GLHF!'+
-                        '</span></strong></h2>');
+			helper.sendNotification('<h2><span class="text-success"><strong>GLHF!</span></strong></h2>');
 			$("#joinWarning").remove();
 		}
 
 		if (currentState == "cancelled") {
 			$("#joinWarning").remove();
 		}
-
 	},
-
 	OnUserVoteStateChanged: function(isCurrentUserVoting, oldValue) {
 		// This function will be called when user voting access is changed
 		debug.log("Current user voting state is " + isCurrentUserVoting + " & userSettings.bAutoVeto:" + userSettings.bAutoVeto);
 		if(isCurrentUserVoting && userSettings.bAutoVeto) {
 			// Perform ban map
-			setTimeout(function() { 
+			setTimeout(function() {
 				for(i=userSettings.arrayMapOrder.length - 1;i > 0 - 1;i--) {
 		            var bSelected = false;
 		            $(".match-vote-item__name").each(function() {
 		                if ($(this).text() == userSettings.arrayMapOrder[i] && $(this).parent().find("button").is(":enabled") && !bSelected) {
 		                    $(this).parent().find("button").click();
 		                    bSelected = true;
-		                    helperFunction.sendNotification('<h3>Auto-veto has <span class="text-danger">banned</span> <strong>'+userSettings.arrayMapOrder[i] + '</strong></h3>');
+		                    helper.sendNotification('<h3>Auto-veto has <span class="text-danger">banned</span> <strong>'+userSettings.arrayMapOrder[i] + '</strong></h3>');
 		                    debug.log("Auto-veto has banned map " + userSettings.arrayMapOrder[i]);
 		                }
 		            });
 	        	}
 	        }, 1000);
 		}
-
 	}
 }
 
@@ -464,10 +463,11 @@ var eventStage = {
 								Action
 ***********************************************************************/
 
-function dispatchStateChange(currentState, lastState, mode) {
+var dispatchStateChange = function(currentState, lastState, mode) {
 	// This function check for data validity before passing to designated function
-	if(!currentState)
+	if(!currentState) {
 		return;
+	}
 
 	if(!lastState) {
 		// This value is undefined after page load suceed
@@ -499,8 +499,8 @@ function dispatchStateChange(currentState, lastState, mode) {
 			console.error("Unknown mode type caught on dispatchStdateChange");
 			break;
 	}
-	if(helperFunction.userInMatchRoom()) {
-		setTimeout(function() { helperFunction.initMatchRoom() }, 500);
+	if(helper.userInMatchRoom()) {
+		setTimeout(function() { helper.initMatchRoom() }, 500);
 	}
 }
 angular.element(document).ready(function () {
@@ -516,12 +516,11 @@ angular.element(document).ready(function () {
 			if(queueScope && queueScope != null) {
 				return queueScope.stage;
 			}
-		}, 
+		},
 		function(newValue, oldValue) {
 			dispatchStateChange(newValue, oldValue, "user");
 		}
 	);
-
 
 	// Watch for match state change
 	$scope.$watch(
@@ -530,7 +529,7 @@ angular.element(document).ready(function () {
 			if(matchScope && matchScope.match != null) {
 				return matchScope.match.state;
 			}
-		}, 
+		},
 		function(newValue, oldValue) {
 			dispatchStateChange(newValue, oldValue, "match");
 		}
@@ -543,16 +542,14 @@ angular.element(document).ready(function () {
 			if(matchVoteScope) {
 				return matchVoteScope.isCurrentUserVoting;
 			}
-		}, 
+		},
 		function(newValue, oldValue) {
 			dispatchStateChange(newValue, oldValue, "match_actionUpdate");
 		}
-	);	
-
+	);
 
 	// Fetch value from localStorage
-	helperSetting.fetch();
+	helperSetting.loadUserSettingsFromStorage();
 	// Create button
-	helperSetting.createButton();
-
+	helperSetting.createButtons();
 });
