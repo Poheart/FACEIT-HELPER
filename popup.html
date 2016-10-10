@@ -7,29 +7,44 @@
     <link rel="stylesheet" type="text/css" href="dragula.min.css">
     <style type="text/css">
     body {
+        margin: 0;
         min-width: 220px;
+    }
+    header {
+        height: 30px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #1a1a1a;
+        color: #fff;
+    }
+    sup {
+        margin-left: 1px;
+        vertical-align: text-top;
+    }
+    h2, h4 {
+        margin: 0;
     }
     .items {
         border: 1px solid black;
         padding: 5px;
         margin: 5px;
     }
-    #maps li,
-    .items {
-        max-width: 120px;
-    }
     </style>
 </head>
 
 <body>
-    <img class="logo" src="icons/icon19.png" alt="Brand">
-    <p id="title"></p>
+    <header>
+        <img class="logo" src="icons/icon19.png" alt="Brand">
+        <p class="title">
+            <strong>FACEIT HELPER v<span class="version"></span></strong><sup>BETA</sup>
+        </p>
+        <p class="status"></p>
+    </header>
     <p id="state"></p>
 
-    <h2>
-        Map priority
-        <small>Define your map priority by re-ordering the list</small>
-    </h2>
+    <h2>Map priority</h2>
+    <h4>Define your map priority by re-ordering the list</h4>
 
     <ol class="sortable" id="maps"></ol>
     <span>1 = Most favorite (ban last); 8 = Least favorite (ban first)</span>

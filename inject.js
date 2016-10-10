@@ -1,3 +1,7 @@
+// TODO: Auto server veto
+// TODO: Flags on lobby
+//
+
 var $scope = angular.element(document).scope();
 
 if($scope) {
@@ -66,19 +70,6 @@ var faceItHelper = {
 			}
 		},
 		{
-			id: "btnAutoCopy",
-			icon: "icon-clipboard_icon",
-			text: "Autocopy IP ",
-			stateId: "sAutoCopy",
-			action: function() {
-				faceItHelper.userSettings.bAutoCopy = !faceItHelper.userSettings.bAutoCopy;
-				localStorage.bAutoCopy = faceItHelper.userSettings.bAutoCopy;
-
-				var txtState = faceItHelper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
-			    $("#sAutoCopy").html(txtState);
-			}
-		},
-		{
 			id: "btnAutoVeto",
 			icon: "icon-map",
 			text: "Auto-Veto ",
@@ -92,6 +83,19 @@ var faceItHelper = {
 			}
 		},
 		{
+			id: "btnAutoCopy",
+			icon: "icon-clipboard_icon",
+			text: "Auto-Copy IP ",
+			stateId: "sAutoCopy",
+			action: function() {
+				faceItHelper.userSettings.bAutoCopy = !faceItHelper.userSettings.bAutoCopy;
+				localStorage.bAutoCopy = faceItHelper.userSettings.bAutoCopy;
+
+				var txtState = faceItHelper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				$("#sAutoCopy").html(txtState);
+			}
+		},
+		{
 			id: "btnPremium",
 			icon: "icon-ic_verified_user_black_48px",
 			text: "Premium ",
@@ -99,9 +103,7 @@ var faceItHelper = {
 			action: function() {
 				faceItHelper.userSettings.bPremium = !faceItHelper.userSettings.bPremium;
 				localStorage.bPremium = faceItHelper.userSettings.bPremium;
-				faceItHelper.sendNotification('<span class="text-info"><strong>'+
-				'Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br>'+
-				'</span>');
+				faceItHelper.sendNotification('<span class="text-info"><strong>Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br></span>');
 
 				var txtState = faceItHelper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sPremium").html(txtState);
@@ -130,10 +132,7 @@ var faceItHelper = {
 				localStorage.bAutoJoin = faceItHelper.userSettings.bAutoJoin;
 
 				if(faceItHelper.userSettings.bAutoJoin) {
-					faceItHelper.sendNotification('<strong><span class="text-success">'+
-				'Auto-Join Enabled</span><hr><small>The game will be launched via new Steam protocol connect command released on 10/6/2016'+
-				'<br>(Without causing FPS drop)</small>'+
-				'</strong>');
+					faceItHelper.sendNotification('<strong><span class="text-success">Auto-Join Enabled</span><hr><small>The game will be launched via new Steam protocol connect command released on 10/6/2016<br>(Without causing FPS drop)</small></strong>');
 				}
 
 				var txtState = faceItHelper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
@@ -141,7 +140,28 @@ var faceItHelper = {
 			}
 		}
 	],
-	UpdateButtons: function() {
+	createButtons: function() {
+		for (var i=0;i<faceItHelper.buttons.length;i++) {
+			var btnCreate = $('<li/>', { id: faceItHelper.buttons[i].id })
+				.append( $('<a/>')
+				.append( $('<i/>').addClass("main-navigation__icon").addClass(faceItHelper.buttons[i].icon) )
+				.append( $('<span/>', { class: 'main-navigation__name', text: faceItHelper.buttons[i].text })
+				.append($('<span/>', { id: faceItHelper.buttons[i].stateId }))))
+				.attr('unselectable', 'on')
+                .css('user-select', 'none')
+                .on('selectstart', false);
+
+			$('.main-navigation ul[ng-controller="NavigationController"]').append(btnCreate);
+			btnCreate.bind("click",  faceItHelper.buttons[i].action);
+		}
+		$('#helperDebug').bind("click", function() {
+			faceItHelper.userSettings.bDebugMode = !faceItHelper.userSettings.bDebugMode;
+			var Status = faceItHelper.userSettings.bDebugMode ? 'enabled' : 'disabled';
+			faceItHelper.sendNotification("Debuging mode " + Status + "!");
+		});
+		setTimeout(function() { faceItHelper.updateButtons(); }, 500);
+	},
+	updateButtons: function() {
 		// TODO: Remove this but make the thing that refeers to it work
 		var txtState;
 	    txtState = faceItHelper.userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
@@ -162,19 +182,17 @@ var faceItHelper = {
 	    txtState = faceItHelper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoJoin").html(txtState);
 	},
-	CopyToClipboard: function(text) {
+	copyToClipboard: function(text) {
 		document.dispatchEvent(new CustomEvent('FH_copyServerIP', {
 	        detail:  { serverIP : text }
 	    }));
 	},
-	AcceptMatch: function() {
+	acceptMatch: function() {
 		// Some people reported checkIn(); will cause modal bug
 		// Using legacy method for now...
 		var acceptBtn = $('.modal-dialog__header__title[translate-once="MATCH-READY"]').parent().parent().find('button[translate-once="ACCEPT"]');
     	acceptBtn.click();
-    	faceItHelper.sendNotification('<span class="text-info"><strong>'+
-                'has accepted the match for you'+
-                '</span></strong>');
+    	faceItHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
 	pageRefresh: function() {
 		angular.reloadWithDebugInfo();
@@ -195,9 +213,7 @@ var faceItHelper = {
 		var btnContinue = $('.modal-dialog__header__title[translate-once="QUICK-MATCH-QUEUING"]').parent().parent().find('button[translate-once="CONTINUE"]');
         if(btnContinue != null && btnContinue.is(":visible")) {
             btnContinue.click();
-            helper.sendNotification('<span class="text-warning"><strong>'+
-                'is now queuing for a match...</strong><br>'+
-                '</span>');
+            helper.sendNotification('<span class="text-warning"><strong>is now queuing for a match...</strong><br></span>');
         }
 		// You have been placed in queue..etc
 	},
@@ -266,15 +282,11 @@ var faceItHelper = {
 	        	clearInterval(timerHandle);
 	        	// In case client changed their mind...
 	        	if(faceItHelper.userSettings.bAutoJoin) {
-		        	faceItHelper.sendNotification('<br><span class="text-success"><strong>'+
-			                        '<h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small>'+
-			                        '</strong>');
+		        	faceItHelper.sendNotification('<br><span class="text-success"><strong><h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small></strong>');
 		            faceItHelper.joinServer(serverIP);
 		            $("#joinWarning").html('<h2><strong class="text-success"><center>YOU WILL BE CONNECTED TO THE SERVER MOMENTARILY</center></strong></h2>');
 		        } else {
-		        	faceItHelper.sendNotification('<br><span class="text-danger"><strong>'+
-		                        '<h2>Auto-Join cancelled</h2></span>'+
-		                        '</strong>');
+		        	faceItHelper.sendNotification('<br><span class="text-danger"><strong><h2>Auto-Join cancelled</h2></span></strong>');
 		        	$("#joinWarning").html('<h2><strong class="text-danger"><center>AUTOJOIN CANCELLED</center></strong></h2>');
 
 		        }
@@ -309,27 +321,6 @@ var faceItHelper = {
 	},
 	fetchMapPreference: function() {
 		document.dispatchEvent(new CustomEvent('FH_getMapsPreference'));
-	},
-	createButtons: function() {
-		for (var i=0;i<faceItHelper.buttons.length;i++) {
-			var btnCreate = $('<li/>', { id: faceItHelper.buttons[i].id })
-				.append( $('<a/>')
-				.append( $('<i/>').addClass("main-navigation__icon").addClass(faceItHelper.buttons[i].icon) )
-				.append( $('<span/>', { class: 'main-navigation__name', text: faceItHelper.buttons[i].text })
-				.append($('<span/>', { id: faceItHelper.buttons[i].stateId }))))
-				.attr('unselectable', 'on')
-                .css('user-select', 'none')
-                .on('selectstart', false);
-
-			$('.main-navigation ul[ng-controller="NavigationController"]').append(btnCreate);
-			btnCreate.bind("click",  faceItHelper.buttons[i].action);
-		}
-		$('#helperDebug').bind("click", function() {
-			faceItHelper.userSettings.bDebugMode = !faceItHelper.userSettings.bDebugMode;
-			var Status = faceItHelper.userSettings.bDebugMode ? 'enabled' : 'disabled';
-			faceItHelper.sendNotification("Debuging mode " + Status + "!");
-		});
-		setTimeout(function() { faceItHelper.UpdateButtons(); }, 500);
 	}
 }
 
@@ -348,7 +339,6 @@ var eventStage = {
 	OnUserStateChange: function(currentState, lastState) {
 		// This function will be called when user stage changed from one to another
 		debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
-		faceItHelper.sendNotification("<strong>eventStage</strong><br>NOW:" + currentState + "<BR>PAST:" +lastState, false, true);
 		if(currentState == "CHECK_IN" || currentState == "WAITING") {
 			if(faceItHelper.userSettings.bMatchedPlayers) {
 				setTimeout(function() {
@@ -364,10 +354,7 @@ var eventStage = {
 			}, 200);
 
 			if(lastState == "MATCH") {
-				faceItHelper.sendNotification('<span class="text-danger"><strong>'+
-                'will now refresh page to prevent match accept bug</strong><hr>'+
-                'Attempting page refresh now...'+
-                '</span>');
+				faceItHelper.sendNotification('<span class="text-danger"><strong>will now refresh page to prevent match accept bug</strong><hr>Attempting page refresh now...</span>');
                 setTimeout(function() {
                 	faceItHelper.pageRefresh();
                 }, 3000);
@@ -376,14 +363,13 @@ var eventStage = {
 
 		if(currentState == "CHECK_IN") {
 			if(faceItHelper.userSettings.bAutoAccept) {
-				faceItHelper.AcceptMatch();
+				faceItHelper.acceptMatch();
 			}
 		}
 	},
 
 	OnMatchStateChange: function(currentState, lastState) {
 		// This function will be called when match state changed from one to another
-		faceItHelper.sendNotification("<strong>eventStage</strong><br>NOW:" + currentState + "<BR>PAST:" +lastState, false, true);
 		debug.log("eventStage CURRENT MATCHSTATE:" + currentState+ " & LAST:" + lastState);
 
 		if(currentState == "voting") {
@@ -400,10 +386,8 @@ var eventStage = {
 
 	                    var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text();
 	                    debug.log("ServerIP is " + serverIP);
-	                    faceItHelper.CopyToClipboard(serverIP);
-	                    faceItHelper.sendNotification('<br><span class="text-success"><strong>'+
-	                        'IP address copied to clipboard'+
-	                        '</span></strong>');
+	                    faceItHelper.copyToClipboard(serverIP);
+	                    faceItHelper.sendNotification('<br><span class="text-success"><strong>IP address copied to clipboard</span></strong>');
 	                }
 
             	}, 1000);
