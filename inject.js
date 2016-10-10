@@ -43,7 +43,7 @@ var globalState = {
 }
 var faceItHelper = {
 	userSettings: {
-		bDebugMode: true,
+		bDebugMode: false,
 		bAutoAccept: false,
 		bAutoCopy: false,
 		bAutoVeto: false,
@@ -211,9 +211,10 @@ var faceItHelper = {
 			$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
 				var list = $('<li/>').addClass("text-left")
 					.append($('<i/>', { id: e.payload.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
-					.append('<img src="https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+
-				e.payload.csgo_skill_level_label+'_sm.png">')
-					.append($('<strong/>', {id: e.payload.guid , text: e.payload.nickname})).append(' - ELO: '+ e.payload.games.csgo.faceit_elo+' - '+ e.payload.membership.type +'</li>');
+					.append('<img src="https://cdn.faceit.com/frontend/231/assets/images/flags/'+e.payload.country.toUpperCase()+'.png">')
+					.append('<img src="https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png">')
+					.append($('<strong/>', {id: e.payload.guid , text: e.payload.nickname}))
+					.append(' - ELO: '+ e.payload.games.csgo.faceit_elo+' - '+ e.payload.membership.type +'</li>');
 
 				$('#player_list').append(list);
 			}, "json");
