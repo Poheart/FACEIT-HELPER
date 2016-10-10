@@ -12,8 +12,6 @@ if($scope) {
 }
 
 /**********************************************************************/
-var
-
 var debug = {
 	log: function(msg) {
 		if(faceItHelper.userSettings.bDebugMode) {
@@ -43,8 +41,6 @@ var globalState = {
 		}
 	}
 }
-var ;
-
 var faceItHelper = {
 	userSettings: {
 		bDebugMode: true,
