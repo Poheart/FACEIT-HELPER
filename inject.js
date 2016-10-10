@@ -51,10 +51,9 @@ var faceItHelper = {
 		bAutoAccept: false,
 		bAutoCopy: false,
 		bAutoVeto: false,
-		bPremium: true,
+		bPremium: false,
 		bMatchedPlayers: false,
-		arrayMapOrder: { },
-		arrayServerOrder: ["UK","France","Netherlands","Germany","Sweden"]
+		arrayMapOrder: { }
 	},
 	buttons: [
 		{
@@ -330,8 +329,7 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	// if array is not set.
 	if(!e.detail.arrayMapOrder) {
 		// Give some default setting
-		// Doesn't this need split()?
-		faceItHelper.userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>".split(">");
+		faceItHelper.userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>";
 	} else {
 		faceItHelper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 	}
@@ -421,20 +419,6 @@ var eventStage = {
 		// This function will be called when user voting access is changed
 		debug.log("Current user voting state is " + isCurrentUserVoting + " & userSettings.bAutoVeto:" + faceItHelper.userSettings.bAutoVeto);
 		if(isCurrentUserVoting && faceItHelper.userSettings.bAutoVeto) {
-			// Perform ban server
-			setTimeout(function() {
-				for(i=faceItHelper.userSettings.arrayServerOrder.length - 1;i > 0 - 1;i--) {
-		            var bSelected = false;
-		            $(".match-vote-item__name").each(function() {
-		                if ($(this).text() == faceItHelper.userSettings.arrayServerOrder[i] && $(this).parent().find("button").is(":enabled") && !bSelected) {
-		                    $(this).parent().find("button").click();
-		                    bSelected = true;
-		                    faceItHelper.sendNotification('<h3>Auto-veto has <span class="text-danger">banned</span> <strong>'+faceItHelper.userSettings.arrayServerOrder[i] + '</strong></h3>');
-		                    debug.log("Auto-veto has banned server " + faceItHelper.userSettings.arrayServerOrder[i]);
-		                }
-		            });
-	        	}
-	        }, 1000);
 			// Perform ban map
 			setTimeout(function() {
 				for(i=faceItHelper.userSettings.arrayMapOrder.length - 1;i > 0 - 1;i--) {
