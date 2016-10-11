@@ -6,7 +6,7 @@ Description: FACEIT HELPER main function
 /*
     Function
 */
-function injectScript(script) {
+var injectScript = function(script) {
     var s = document.createElement('script');
     s.src = chrome.extension.getURL(script);
     (document.head||document.documentElement).appendChild(s);
@@ -33,10 +33,10 @@ document.addEventListener('FH_getMapsPreference', function(e) {
 });
 
 document.addEventListener('FH_copyServerIP', function(e) {
-    CopyToClipboard(e.detail.serverIP);
+    copyToClipboard(e.detail.serverIP);
 });
 
-function CopyToClipboard( text ){
+var copyToClipboard = function( text ){
     var copyDiv = document.createElement('div');
     copyDiv.contentEditable = true;
     document.body.appendChild(copyDiv);

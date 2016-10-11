@@ -1,57 +1,56 @@
 <!DOCTYPE html>
 <html>
- 
+
 <head>
     <meta charset="utf-8">
     <title>FACEIT HELPER</title>
+    <link rel="stylesheet" type="text/css" href="dragula.min.css">
     <style type="text/css">
-body {
-  min-width: 800px; /* your desired width */
-  max-width: 100%;
-  min-height: 400px;
-  position: relative;
-  vertical-align:middle;
-}
-.items {
-    width: 500px;
-    border: 1px solid black;
-    padding: 5px;
-    margin: 5px;
-}
-</style>
-<link rel="stylesheet" href="css/bootstrap.min.css">
-<script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="jquery-ui.min.js"></script>
+    body {
+        margin: 0;
+        min-width: 220px;
+    }
+    header {
+        height: 30px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #1a1a1a;
+        color: #fff;
+    }
+    sup {
+        margin-left: 1px;
+        vertical-align: text-top;
+    }
+    h2, h4 {
+        margin: 0;
+    }
+    .items {
+        border: 1px solid black;
+        padding: 5px;
+        margin: 5px;
+    }
+    </style>
 </head>
- 
+
 <body>
-<nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">
-        <img alt="Brand" height="20" src="icon19.png">
-      </a>
-      <p class="navbar-text" id="title">chrome.extension.faceit-helper.version</p>
-      <p id="state" class="pull-right navbar-text"></p>
+    <header>
+        <img class="logo" src="icons/icon19.png" alt="Brand">
+        <p class="title">
+            <strong>FACEIT HELPER v<span class="version"></span></strong><sup>BETA</sup>
+        </p>
+        <p class="status"></p>
+    </header>
+    <p id="state"></p>
 
-    </div>
-  </div>
-</nav>
-<div class="container pull-right">
-<div class="page-header" style="margin-top: 50px">
-  <h2>Map priority
-  <small>Define your map priority by re-ordering the list</small></h2>
-</div>
+    <h2>Map priority</h2>
+    <h4>Define your map priority by re-ordering the list</h4>
 
-<ol class="sortable">
-</ol>
-<span class="label label-default text-center">1 = Most favorite (ban last); 8 = Least favorite (ban first)</span>
-<hr>
-<pre id="toArrayOutput">Please drag-and-drop to re-order your map preferences</pre>
+    <ol class="sortable" id="maps"></ol>
+    <span>1 = Most favorite (ban last); 8 = Least favorite (ban first)</span>
 
-</div>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dragula.min.js"></script>
+    <script type="text/javascript" src="popup.js"></script>
 </body>
-<script type="text/javascript" src="jquery.mjs.nestedSortable.js"></script>
-<script type="text/javascript" src="popup.js"></script>
-<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </html>

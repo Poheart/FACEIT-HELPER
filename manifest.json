@@ -3,11 +3,12 @@
 
   "name": "FACEIT HELPER",
   "description": "FACEIT user experience enhancement tools",
-  "version": "3.1.4",
+  "version": "3.1.5",
+  "author": "Poheart & CullenIO",
   "page_action": {
         "default_icon": {
-            "19": "icon19.png",
-            "38": "icon38.png"
+            "19": "icons/icon19.png",
+            "38": "icons/icon38.png"
         },
         "default_title": "FACEIT Experience enhancement",
         "default_popup": "popup.html"
@@ -19,17 +20,18 @@
   "content_scripts": [
     {
       "matches": ["https://www.faceit.com/*"],
-      "js": ["jquery.js", "main.js", "jquery.mjs.nestedSortable.js"],
+      "js": ["jquery.js", "main.js"],
       "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
         "inject.js"
     ],
-  "icons": { "16": "icon16.png",
-            "48": "icon48.png",
-            "128": "icon128.png" },
-  
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": [
     "<all_urls>",
     "webRequest",
