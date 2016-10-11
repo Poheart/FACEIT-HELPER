@@ -57,6 +57,33 @@ var faceItHelper = {
 	},
 	buttons: [
 		{
+			id: "btnPremium",
+			icon: "icon-ic_verified_user_black_48px",
+			text: "Premium ",
+			stateId: "sPremium",
+			action: function() {
+				faceItHelper.userSettings.bPremium = !faceItHelper.userSettings.bPremium;
+				localStorage.bPremium = faceItHelper.userSettings.bPremium;
+				faceItHelper.sendNotification('<span class="text-info"><strong>Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br></span>');
+
+				var txtState = faceItHelper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+			    $("#sPremium").html(txtState);
+			}
+		},
+		{
+			id: "btnMatchedPlayers",
+			icon: "icon-ic_navigation_party_48px",
+			text: "Show Matched Players ",
+			stateId: "sMatchedPlayers",
+			action: function() {
+				faceItHelper.userSettings.bMatchedPlayers = !faceItHelper.userSettings.bMatchedPlayers;
+				localStorage.bMatchedPlayers = faceItHelper.userSettings.bMatchedPlayers;
+
+				var txtState = faceItHelper.userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+			    $("#sMatchedPlayers").html(txtState);
+			}
+		},
+		{
 			id: "btnAutoAccept",
 			icon: "icon-ic_check_generic",
 			text: "Auto-Accept ",
@@ -93,33 +120,6 @@ var faceItHelper = {
 
 				var txtState = faceItHelper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 				$("#sAutoCopy").html(txtState);
-			}
-		},
-		{
-			id: "btnPremium",
-			icon: "icon-ic_verified_user_black_48px",
-			text: "Premium ",
-			stateId: "sPremium",
-			action: function() {
-				faceItHelper.userSettings.bPremium = !faceItHelper.userSettings.bPremium;
-				localStorage.bPremium = faceItHelper.userSettings.bPremium;
-				faceItHelper.sendNotification('<span class="text-info"><strong>Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br></span>');
-
-				var txtState = faceItHelper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
-			    $("#sPremium").html(txtState);
-			}
-		},
-		{
-			id: "btnMatchedPlayers",
-			icon: "icon-ic_navigation_party_48px",
-			text: "Show Matched Players ",
-			stateId: "sMatchedPlayers",
-			action: function() {
-				faceItHelper.userSettings.bMatchedPlayers = !faceItHelper.userSettings.bMatchedPlayers;
-				localStorage.bMatchedPlayers = faceItHelper.userSettings.bMatchedPlayers;
-
-				var txtState = faceItHelper.userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
-			    $("#sMatchedPlayers").html(txtState);
 			}
 		},
 		{
@@ -227,11 +227,14 @@ var faceItHelper = {
 			$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
 				var list = $('<li/>').addClass("text-left")
 					.append($('<i/>', { id: e.payload.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
-					.append('<img src="https://cdn.faceit.com/frontend/231/assets/images/flags/'+e.payload.country.toUpperCase()+'.png">')
+					.append('<img class="flag flag--16" src="https://cdn.faceit.com/frontend/231/assets/images/flags/'+e.payload.country.toUpperCase()+'.png">')
 					.append('<img src="https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png">')
 					.append($('<strong/>', {id: e.payload.guid , text: e.payload.nickname}))
 					.append(' - ELO: '+ e.payload.games.csgo.faceit_elo+' - '+ e.payload.membership.type +'</li>');
-
+					// Temp party indicator - uses first 6 chars of team id as hex colour
+					if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
+						list.append('<i class="icon-ic_navigation_party_48px" style="color:#'+e.payload.active_team_id.substring(0,6)+'"></i>');
+					}
 				$('#player_list').append(list);
 			}, "json");
 		}
