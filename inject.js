@@ -213,7 +213,7 @@ var faceItHelper = {
 		var btnContinue = $('.modal-dialog__header__title[translate-once="QUICK-MATCH-QUEUING"]').parent().parent().find('button[translate-once="CONTINUE"]');
         if(btnContinue != null && btnContinue.is(":visible")) {
             btnContinue.click();
-            helper.sendNotification('<span class="text-warning"><strong>is now queuing for a match...</strong><br></span>');
+            faceItHelper.sendNotification('<span class="text-warning"><strong>is now queuing for a match...</strong><br></span>');
         }
 		// You have been placed in queue..etc
 	},
