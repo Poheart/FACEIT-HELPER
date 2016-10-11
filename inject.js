@@ -25,7 +25,7 @@ var debug = {
 }
 var globalState = {
 	match: {currentState: "", lastState: ""},
-	user: {currentState: "", lastState: ""},
+	user: {currentState: "", lastState: "", region: ""},
 	set: {
 		match: function(currentState, lastState) {
 			globalState.match.currentState = currentState;
@@ -330,9 +330,8 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	if(!e.detail.arrayMapOrder) {
 		// Give some default setting
 		faceItHelper.userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>";
-	} else {
-		faceItHelper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 	}
+	faceItHelper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 });
 
 var eventStage = {
@@ -350,6 +349,8 @@ var eventStage = {
 		// Perform action when under certain conditional
 		if(currentState == "IN_QUEUE") {
 			setTimeout(function() {
+				// Save user current region for later server veto implementation
+				globalState.user.region = angular.element('.queue--sm').scope().quickMatch.region;
 				faceItHelper.hideDialogBox();
 			}, 200);
 
