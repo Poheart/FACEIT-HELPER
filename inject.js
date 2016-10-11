@@ -473,7 +473,7 @@ var dispatchStateChange = function(currentState, lastState, mode) {
 			}
 			break;
 		default:
-			console.error("Unknown mode type caught on dispatchStdateChange");
+			console.error("Unknown mode type caught on dispatchStateChange");
 			break;
 	}
 	if(faceItHelper.userInMatchRoom()) {
