@@ -233,7 +233,7 @@ var faceItHelper = {
 					.append(' - ELO: '+ e.payload.games.csgo.faceit_elo+' - '+ e.payload.membership.type +'</li>');
 					// Temp party indicator - uses first 6 chars of team id as hex colour
 					if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
-						list.append('<i class="icon-ic_verified_user_black_48px" style="color:#'+e.payload.active_team_id.substring(0,6)+'"></i>');
+						list.append('<i class="icon-ic_navigation_party_48px" style="color:#'+e.payload.active_team_id.substring(0,6)+'"></i>');
 					}
 				$('#player_list').append(list);
 			}, "json");
