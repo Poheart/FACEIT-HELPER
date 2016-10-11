@@ -9,9 +9,9 @@ Little FACEIT chrome extension that help you auto accept match when there's one 
 ### Now with:
 * Auto-Join server (using new Steam connect protocol on 6/10/2016)
 * Show Matched Players (BETA)
-..* Know your opponents before accepting the match
-..* Know where your opponents are from
-..* Also know who didn't accept/accepted!
+  ..* Know your opponents before accepting the match
+  ..* Know where your opponents are from
+  ..* Also know who didn't accept/accepted!
 * Auto match accept (with bug workaround)
 * Auto map veto (BETA)
 * Auto copy-server IP address
