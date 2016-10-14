@@ -225,15 +225,25 @@ var faceItHelper = {
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
 		for (var i = 0; i < joined_players.length; i++) {
 			$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
+				var fetchedValue = {
+					guid: e.payload.guid,
+					skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png',
+					country: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
+					nickname: e.payload.nickname,
+					elo: e.payload.games.csgo.faceit_elo,
+					type: e.payload.membership.type,
+					teamid: e.payload.active_team_id
+				};
+
 				var list = $('<li/>').addClass("text-left")
-					.append($('<i/>', { id: e.payload.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
-					.append('<img class="flag flag--16" src="https://cdn.faceit.com/frontend/231/assets/images/flags/'+e.payload.country.toUpperCase()+'.png">')
-					.append('<img src="https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png">')
-					.append($('<strong/>', {id: e.payload.guid , text: e.payload.nickname}))
-					.append(' - ELO: '+ e.payload.games.csgo.faceit_elo+' - '+ e.payload.membership.type +'</li>');
+					.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
+					.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "faceItHelper.loadError(this, 'country')" }))
+					.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "faceItHelper.loadError(this, 'skills')"}))
+					.append($('<strong/>', {id: fetchedValue.guid , text: fetchedValue.nickname}))
+					.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>');
 					// Temp party indicator - uses first 6 chars of team id as hex colour
 					if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
-						list.append('<i class="icon-ic_navigation_party_48px" style="color:#'+e.payload.active_team_id.substring(0,6)+'"></i>');
+						list.append($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + fetchedValue.teamid.substring(0,6) }));
 					}
 				$('#player_list').append(list);
 			}, "json");
@@ -289,7 +299,7 @@ var faceItHelper = {
 		            faceItHelper.joinServer(serverIP);
 		            $("#joinWarning").html('<h2><strong class="text-success"><center>YOU WILL BE CONNECTED TO THE SERVER MOMENTARILY</center></strong></h2>');
 		        } else {
-		        	faceItHelper.sendNotification('<br><span class="text-danger"><strong><h2>Auto-Join cancelled</h2></span></strong>');
+		        	faceItHelper.sendNotification('<span class="text-danger"><strong><h2>Auto-Join cancelled</h2></span></strong>');
 		        	$("#joinWarning").html('<h2><strong class="text-danger"><center>AUTOJOIN CANCELLED</center></strong></h2>');
 
 		        }
@@ -324,6 +334,16 @@ var faceItHelper = {
 	},
 	fetchMapPreference: function() {
 		document.dispatchEvent(new CustomEvent('FH_getMapsPreference'));
+	},
+	loadError: function(img, type) {
+		if(type == "country") {
+			img.onerror = null;
+			img.src = "https://faceit.poheart.net/images/country-notfound.png";
+		} else if(type == "skills") {
+			img.onerror = null;
+			img.src = "https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_0_sm.png";
+		}
+		return true;
 	}
 }
 
@@ -519,7 +539,9 @@ angular.element(document).ready(function () {
 			}
 		},
 		function(newValue, oldValue) {
-			dispatchStateChange(newValue, oldValue, "match_actionUpdate");
+			setTimeout(function() {
+				dispatchStateChange(newValue, oldValue, "match_actionUpdate");
+			}, 2000;)
 		}
 	);
 

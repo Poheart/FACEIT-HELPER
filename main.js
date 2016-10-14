@@ -40,7 +40,7 @@ var copyToClipboard = function( text ){
     var copyDiv = document.createElement('div');
     copyDiv.contentEditable = true;
     document.body.appendChild(copyDiv);
-    copyDiv.innerHTML = text;
+    copyDiv.innerText = text;
     copyDiv.unselectable = "off";
     copyDiv.focus();
     document.execCommand('SelectAll');

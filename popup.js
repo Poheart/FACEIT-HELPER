@@ -31,5 +31,5 @@ $(function(){
     });
 
     var manifest = chrome.runtime.getManifest();
-    $('.version').html(manifest.version);
+    $('.version').text(manifest.version);
 });
