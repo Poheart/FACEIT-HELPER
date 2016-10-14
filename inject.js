@@ -298,10 +298,11 @@ var faceItHelper = {
 		        	faceItHelper.sendNotification('<br><span class="text-success"><strong><h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small></strong>');
 		            faceItHelper.joinServer(serverIP);
 		            $("#joinWarning").html('<h2><strong class="text-success"><center>YOU WILL BE CONNECTED TO THE SERVER MOMENTARILY</center></strong></h2>');
+		            new Audio("https://faceit.poheart.net/sounds/autojoin_confirm.mp3").play();
 		        } else {
 		        	faceItHelper.sendNotification('<span class="text-danger"><strong><h2>Auto-Join cancelled</h2></span></strong>');
 		        	$("#joinWarning").html('<h2><strong class="text-danger"><center>AUTOJOIN CANCELLED</center></strong></h2>');
-
+		        	new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
 		        }
 	        }
 	    }, 1000);
@@ -412,6 +413,7 @@ var eventStage = {
 	                    debug.log("ServerIP is " + serverIP);
 	                    faceItHelper.copyToClipboard(serverIP);
 	                    faceItHelper.sendNotification('<br><span class="text-success"><strong>IP address copied to clipboard</span></strong>');
+	                    new Audio("https://faceit.poheart.net/sounds/copied.mp3").play();
 	                }
 
             	}, 1000);
