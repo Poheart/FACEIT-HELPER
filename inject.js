@@ -541,7 +541,7 @@ angular.element(document).ready(function () {
 		function(newValue, oldValue) {
 			setTimeout(function() {
 				dispatchStateChange(newValue, oldValue, "match_actionUpdate");
-			}, 2000;)
+			}, 2000);
 		}
 	);
 
