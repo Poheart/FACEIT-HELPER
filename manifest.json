@@ -38,7 +38,6 @@
     "webRequestBlocking",
     "activeTab",
     "storage",
-    "clipboardWrite",
-    "clipboardRead"
+    "clipboardWrite"
   ]
 }
