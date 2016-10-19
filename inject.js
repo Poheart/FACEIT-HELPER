@@ -18,7 +18,7 @@ if($scope) {
 /**********************************************************************/
 var debug = {
 	log: function(msg) {
-		if(faceItHelper.userSettings.bDebugMode) {
+		if(helper.userSettings.bDebugMode) {
 			console.log('%c [DEBUG]' + msg, 'background: #222; color: #bada55');
 		}
 	}
@@ -45,7 +45,7 @@ var globalState = {
 		}
 	}
 }
-var faceItHelper = {
+var helper = {
 	userSettings: {
 		bDebugMode: false,
 		bAutoAccept: false,
@@ -62,11 +62,11 @@ var faceItHelper = {
 			text: "Premium ",
 			stateId: "sPremium",
 			action: function() {
-				faceItHelper.userSettings.bPremium = !faceItHelper.userSettings.bPremium;
-				localStorage.bPremium = faceItHelper.userSettings.bPremium;
-				faceItHelper.sendNotification('<span class="text-info"><strong>Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br></span>');
+				helper.userSettings.bPremium = !helper.userSettings.bPremium;
+				localStorage.bPremium = helper.userSettings.bPremium;
+				helper.sendNotification('<span class="text-info"><strong>Setting will be applied and effective on next page refresh...<br>(Ctrl+R/F5)</strong><br></span>');
 
-				var txtState = faceItHelper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				var txtState = helper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sPremium").html(txtState);
 			}
 		},
@@ -76,10 +76,10 @@ var faceItHelper = {
 			text: "Show Matched Players ",
 			stateId: "sMatchedPlayers",
 			action: function() {
-				faceItHelper.userSettings.bMatchedPlayers = !faceItHelper.userSettings.bMatchedPlayers;
-				localStorage.bMatchedPlayers = faceItHelper.userSettings.bMatchedPlayers;
+				helper.userSettings.bMatchedPlayers = !helper.userSettings.bMatchedPlayers;
+				localStorage.bMatchedPlayers = helper.userSettings.bMatchedPlayers;
 
-				var txtState = faceItHelper.userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				var txtState = helper.userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sMatchedPlayers").html(txtState);
 			}
 		},
@@ -89,10 +89,10 @@ var faceItHelper = {
 			text: "Auto-Accept ",
 			stateId: "sAutoAccept",
 			action: function() {
-				faceItHelper.userSettings.bAutoAccept = !faceItHelper.userSettings.bAutoAccept;
-				localStorage.bAutoAccept = faceItHelper.userSettings.bAutoAccept;
+				helper.userSettings.bAutoAccept = !helper.userSettings.bAutoAccept;
+				localStorage.bAutoAccept = helper.userSettings.bAutoAccept;
 
-				var txtState = faceItHelper.userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				var txtState = helper.userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sAutoAccept").html(txtState);
 			}
 		},
@@ -102,10 +102,10 @@ var faceItHelper = {
 			text: "Auto-Veto ",
 			stateId: "sAutoVeto",
 			action: function() {
-				faceItHelper.userSettings.bAutoVeto = !faceItHelper.userSettings.bAutoVeto;
-				localStorage.bAutoVeto = faceItHelper.userSettings.bAutoVeto;
+				helper.userSettings.bAutoVeto = !helper.userSettings.bAutoVeto;
+				localStorage.bAutoVeto = helper.userSettings.bAutoVeto;
 
-				var txtState = faceItHelper.userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				var txtState = helper.userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sAutoVeto").html(txtState);
 			}
 		},
@@ -115,10 +115,10 @@ var faceItHelper = {
 			text: "Auto-Copy IP ",
 			stateId: "sAutoCopy",
 			action: function() {
-				faceItHelper.userSettings.bAutoCopy = !faceItHelper.userSettings.bAutoCopy;
-				localStorage.bAutoCopy = faceItHelper.userSettings.bAutoCopy;
+				helper.userSettings.bAutoCopy = !helper.userSettings.bAutoCopy;
+				localStorage.bAutoCopy = helper.userSettings.bAutoCopy;
 
-				var txtState = faceItHelper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				var txtState = helper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 				$("#sAutoCopy").html(txtState);
 			}
 		},
@@ -128,58 +128,58 @@ var faceItHelper = {
 			text: "Auto-Join Server ",
 			stateId: "sAutoJoin",
 			action: function() {
-				faceItHelper.userSettings.bAutoJoin = !faceItHelper.userSettings.bAutoJoin;
-				localStorage.bAutoJoin = faceItHelper.userSettings.bAutoJoin;
+				helper.userSettings.bAutoJoin = !helper.userSettings.bAutoJoin;
+				localStorage.bAutoJoin = helper.userSettings.bAutoJoin;
 
-				if(faceItHelper.userSettings.bAutoJoin) {
-					faceItHelper.sendNotification('<strong><span class="text-success">Auto-Join Enabled</span><hr><small>The game will be launched via new Steam protocol connect command released on 10/6/2016<br>(Without causing FPS drop)</small></strong>');
+				if(helper.userSettings.bAutoJoin) {
+					helper.sendNotification('<strong><span class="text-success">Auto-Join Enabled</span><hr><small>The game will be launched via new Steam protocol connect command released on 10/6/2016<br>(Without causing FPS drop)</small></strong>');
 				}
 
-				var txtState = faceItHelper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+				var txtState = helper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sAutoJoin").html(txtState);
 			}
 		}
 	],
 	createButtons: function() {
-		for (var i=0;i<faceItHelper.buttons.length;i++) {
-			var btnCreate = $('<li/>', { id: faceItHelper.buttons[i].id })
+		for (var i=0;i<helper.buttons.length;i++) {
+			var btnCreate = $('<li/>', { id: helper.buttons[i].id })
 				.append( $('<a/>')
-				.append( $('<i/>').addClass("main-navigation__icon").addClass(faceItHelper.buttons[i].icon) )
-				.append( $('<span/>', { class: 'main-navigation__name', text: faceItHelper.buttons[i].text })
-				.append($('<span/>', { id: faceItHelper.buttons[i].stateId }))))
+				.append( $('<i/>').addClass("main-navigation__icon").addClass(helper.buttons[i].icon) )
+				.append( $('<span/>', { class: 'main-navigation__name', text: helper.buttons[i].text })
+				.append($('<span/>', { id: helper.buttons[i].stateId }))))
 				.attr('unselectable', 'on')
                 .css('user-select', 'none')
                 .on('selectstart', false);
 
 			$('.main-navigation ul[ng-controller="NavigationController"]').append(btnCreate);
-			btnCreate.bind("click",  faceItHelper.buttons[i].action);
+			btnCreate.bind("click",  helper.buttons[i].action);
 		}
 		$('#helperDebug').bind("click", function() {
-			faceItHelper.userSettings.bDebugMode = !faceItHelper.userSettings.bDebugMode;
-			var Status = faceItHelper.userSettings.bDebugMode ? 'enabled' : 'disabled';
-			faceItHelper.sendNotification("Debuging mode " + Status + "!");
+			helper.userSettings.bDebugMode = !helper.userSettings.bDebugMode;
+			var Status = helper.userSettings.bDebugMode ? 'enabled' : 'disabled';
+			helper.sendNotification("Debuging mode " + Status + "!");
 		});
-		setTimeout(function() { faceItHelper.updateButtons(); }, 500);
+		setTimeout(function() { helper.updateButtons(); }, 500);
 	},
 	updateButtons: function() {
 		// TODO: Remove this but make the thing that refeers to it work
 		var txtState;
-	    txtState = faceItHelper.userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+	    txtState = helper.userSettings.bAutoAccept ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoAccept").html(txtState);
 
-	    txtState = faceItHelper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+	    txtState = helper.userSettings.bAutoCopy ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoCopy").html(txtState);
 
-		txtState = faceItHelper.userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+		txtState = helper.userSettings.bAutoVeto ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 		$("#sAutoVeto").html(txtState);
 
-	    txtState = faceItHelper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+	    txtState = helper.userSettings.bPremium ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sPremium").html(txtState);
 
-	    txtState = faceItHelper.userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+	    txtState = helper.userSettings.bMatchedPlayers ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sMatchedPlayers").html(txtState);
 
-	    txtState = faceItHelper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+	    txtState = helper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoJoin").html(txtState);
 	},
 	copyToClipboard: function(text) {
@@ -192,13 +192,13 @@ var faceItHelper = {
 		// Using legacy method for now...
 		var acceptBtn = $('.modal-dialog__header__title[translate-once="MATCH-READY"]').parent().parent().find('button[translate-once="ACCEPT"]');
     	acceptBtn.click();
-    	faceItHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
+    	helper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
 	pageRefresh: function() {
 		angular.reloadWithDebugInfo();
 	},
 	sendNotification: function(messages, showTitle=true, debugMode=false) {
-		if(debugMode && !faceItHelper.userSettings.bDebugMode) {
+		if(debugMode && !helper.userSettings.bDebugMode) {
 			return;
 		}
 		if(showTitle) {
@@ -213,7 +213,7 @@ var faceItHelper = {
 		var btnContinue = $('.modal-dialog__header__title[translate-once="QUICK-MATCH-QUEUING"]').parent().parent().find('button[translate-once="CONTINUE"]');
         if(btnContinue != null && btnContinue.is(":visible")) {
             btnContinue.click();
-            faceItHelper.sendNotification('<span class="text-warning"><strong>is now queuing for a match...</strong><br></span>');
+            helper.sendNotification('<span class="text-warning"><strong>is now queuing for a match...</strong><br></span>');
         }
 		// You have been placed in queue..etc
 	},
@@ -237,8 +237,8 @@ var faceItHelper = {
 
 				var list = $('<li/>').addClass("text-left")
 					.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
-					.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "faceItHelper.loadError(this, 'country')" }))
-					.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "faceItHelper.loadError(this, 'skills')"}))
+					.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "helper.loadError(this, 'country')" }))
+					.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "helper.loadError(this, 'skills')"}))
 					.append($('<strong/>', {id: fetchedValue.guid , text: fetchedValue.nickname}))
 					.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>');
 					// Temp party indicator - uses first 6 chars of team id as hex colour
@@ -249,7 +249,7 @@ var faceItHelper = {
 			}, "json");
 		}
 		setTimeout(function() {
-			faceItHelper.timerCheckAcceptedPlayers(globalState.user.currentState);
+			helper.timerCheckAcceptedPlayers(globalState.user.currentState);
 		}, 1000);
 	},
 	timerCheckAcceptedPlayers: function(currentState) {
@@ -294,44 +294,31 @@ var faceItHelper = {
 	        if (--timer < 0) {
 	        	clearInterval(timerHandle);
 	        	// In case client changed their mind...
-	        	if(faceItHelper.userSettings.bAutoJoin) {
-		        	faceItHelper.sendNotification('<br><span class="text-success"><strong><h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small></strong>');
-		            faceItHelper.joinServer(serverIP);
+	        	if(helper.userSettings.bAutoJoin) {
+		        	helper.sendNotification('<br><span class="text-success"><strong><h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small></strong>');
+		            helper.joinServer(serverIP);
 		            $("#joinWarning").html('<h2><strong class="text-success"><center>YOU WILL BE CONNECTED TO THE SERVER MOMENTARILY</center></strong></h2>');
 		            new Audio("https://faceit.poheart.net/sounds/autojoin_confirm.mp3").play();
 		        } else {
-		        	faceItHelper.sendNotification('<span class="text-danger"><strong><h2>Auto-Join cancelled</h2></span></strong>');
+		        	helper.sendNotification('<span class="text-danger"><strong><h2>Auto-Join cancelled</h2></span></strong>');
 		        	$("#joinWarning").html('<h2><strong class="text-danger"><center>AUTOJOIN CANCELLED</center></strong></h2>');
 		        	new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
 		        }
 	        }
 	    }, 1000);
 	},
-	initMatchRoom: function() {
-		var matchPlayers = $(".match-team-member.match-team-member--team");
-		for (var i = 0; i < matchPlayers.length; i++) {
-			var name = $(matchPlayers[i]).find("strong").text();
-			if(name == "Poheart") {
-				var badge = $(".dev-badge");
-				if(badge.length <= 0) {
-					$(matchPlayers[i]).find(".match-team-member__details__name > div")
-						.prepend($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
-				}
-			}
-		}
-	},
 	userInMatchRoom: function() {
 		return window.location.pathname.indexOf('/room/') != -1;
 	},
 	loadUserSettingsFromStorage: function() {
-		faceItHelper.userSettings.bAutoAccept = localStorage.bAutoAccept == "true" ? true : false;
-		faceItHelper.userSettings.bAutoCopy = localStorage.bAutoCopy == "true" ? true : false;
-		faceItHelper.userSettings.bAutoVeto = localStorage.bAutoVeto == "true" ? true : false;
-		faceItHelper.userSettings.bPremium = localStorage.bPremium == "true" ? true : false;
-		faceItHelper.userSettings.bMatchedPlayers = localStorage.bMatchedPlayers == "true" ? true : false;
-		faceItHelper.userSettings.bAutoJoin = localStorage.bAutoJoin == "true" ? true : false;
+		helper.userSettings.bAutoAccept = localStorage.bAutoAccept == "true" ? true : false;
+		helper.userSettings.bAutoCopy = localStorage.bAutoCopy == "true" ? true : false;
+		helper.userSettings.bAutoVeto = localStorage.bAutoVeto == "true" ? true : false;
+		helper.userSettings.bPremium = localStorage.bPremium == "true" ? true : false;
+		helper.userSettings.bMatchedPlayers = localStorage.bMatchedPlayers == "true" ? true : false;
+		helper.userSettings.bAutoJoin = localStorage.bAutoJoin == "true" ? true : false;
 		// Fetch user map preferences
-		faceItHelper.fetchMapPreference();
+		helper.fetchMapPreference();
 	},
 	fetchMapPreference: function() {
 		document.dispatchEvent(new CustomEvent('FH_getMapsPreference'));
@@ -353,19 +340,144 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	// if array is not set.
 	if(!e.detail.arrayMapOrder) {
 		// Give some default setting
-		faceItHelper.userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>";
+		helper.userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>";
 	}
-	faceItHelper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
+	helper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 });
 
+var lobbyStats = {
+	statsReady: false,
+	fetchData: function() {
+		// Do action here
+		var playerList = lobbyStats.fetchPlayerlist();
+		if(playerList.length != 10) {
+			debug.log("[fetchData] Warning: playerList.length:" + playerList.length + ", insufficient data to process.");
+		}
+
+		lobbyStats.data = [];
+		var roomID = lobbyStats.getRoomGUID();
+		for (var i = 0; i < playerList.length; i++) {
+			$.get('https://api.faceit.com/api/users/'+playerList[i], function(userProfile) {
+				$.get('https://api.faceit.com/stats/api/v1/stats/users/'+userProfile.payload.guid+'/games/csgo', function(userStats) {
+					userProfile = userProfile.payload;
+					lobbyStats.data.push({
+						roomid: roomID,
+						id: userProfile.guid, 
+						nickname: userProfile.nickname,
+						country:  userProfile.country,
+						country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
+						party_id: userProfile.active_team_id,
+						elo: userProfile.games.csgo.faceit_elo
+					});
+				}, "json");
+			}, "json");
+		}
+		debug.log("[fetchData] Fetch data completed");
+		setTimeout(function() { 
+			debug.log("[fetchData] Requesting content inject.");
+			lobbyStats.injectContent();
+		}, 3000);
+	},
+	isInjected: function() {
+		var injectCount = $('.helper-stats');
+		return injectCount.length > 0;
+	},
+	isDataReady: function(roomID) {
+		var validResult = 0;
+		for(var i=0;i<lobbyStats.data.length;i++) {
+			if(lobbyStats.data[i].roomid == roomID) {
+				validResult++;
+			}
+		}
+		return validResult >= 10;
+	},
+	getRoomGUID: function() {
+		if(!helper.userInMatchRoom()) {
+			return false;
+		}
+		var matchScope = angular.element('.match-vs').scope();
+		if(!matchScope) {
+			return false;
+		}
+		return matchScope.match.guid;
+
+	},
+	fetchPlayerlist: function() {
+		var matchPlayers = [];
+		var matchScope = angular.element('.match-vs').scope();
+		if(!matchScope) {
+			return false;
+		}
+		var fraction1 = matchScope.match.faction1;
+		var fraction2 = matchScope.match.faction2;
+
+		if(!fraction1 || !fraction2) {
+			return false;
+		}
+		if(fraction1.length + fraction2.length != 10) {
+			return false;
+		}
+
+		for(var i=0;i<fraction1.length;i++) {
+			matchPlayers.push(fraction1[i].guid);
+		}
+		for(var i=0;i<fraction2.length;i++) {
+			matchPlayers.push(fraction2[i].guid);
+		}
+		debug.log("[fetchPlayerlist] Pulled " + matchPlayers.length + " data from player list");
+		return matchPlayers;
+		
+	},
+	injectContent: function() {
+		var matchScope = angular.element('.match-vs').scope();
+
+		var matchPlayers = $(".match-team-member.match-team-member--team");
+
+		debug.log("[injectContent] lobbyStats.data.length: " + lobbyStats.data.length);
+		for(var i=0;i<lobbyStats.data.length;i++) { // Data length
+			for (var j = 0; j < matchPlayers.length; j++) { // DOM Content team member length
+				var name = $(matchPlayers[j]).find("strong").text();
+				var state = $(matchPlayers[j]).find("span").hasClass("helper-stats");
+				if(name == lobbyStats.data[i].nickname && !state) {
+					// Our targered users for this loop
+						var faceitstats_link = "http://faceitstats.com/profile,name," +  name;
+						$(matchPlayers[j]).find('.match-team-member__controls--team > div')
+							.after($('<img>', { src: lobbyStats.data[i].country_flag, onerror: "helper.loadError(this, 'country')" }));
+						$(matchPlayers[j]).find('.match-team-member__controls--team > a')
+							.after($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
+						$(matchPlayers[j]).find('.match-team-member__details__name > div')
+							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[i].elo, class: "text-info" }));
+						// if(lobbyStats.data[i].party_id) {
+						// 	$(matchPlayers[j]).find("strong")
+						// 		.after($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + lobbyStats.data[i].party_id.substring(0,6) }));
+						// }
+
+					//break;
+				}
+
+				if(name == "Poheart") {
+				var badge = $(".dev-badge");
+				if(badge.length <= 0) {
+					$(matchPlayers[i]).find(".match-team-member__details__name > div")
+						.prepend($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
+				}
+			}
+
+			}
+		}
+		debug.log("[injectContent] Run success.");
+
+	},
+	data: []
+};
 var eventStage = {
 	OnUserStateChange: function(currentState, lastState) {
 		// This function will be called when user stage changed from one to another
 		debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
 		if(currentState == "CHECK_IN" || currentState == "WAITING") {
-			if(faceItHelper.userSettings.bMatchedPlayers) {
+			if(helper.userSettings.bMatchedPlayers) {
 				setTimeout(function() {
-					faceItHelper.appendPlayerList();
+					helper.appendPlayerList();
 				}, 1500);
 			}
 		}
@@ -375,20 +487,20 @@ var eventStage = {
 			setTimeout(function() {
 				// Save user current region for later server veto implementation
 				globalState.user.region = angular.element('.queue--sm').scope().quickMatch.region;
-				faceItHelper.hideDialogBox();
+				helper.hideDialogBox();
 			}, 200);
 
 			if(lastState == "MATCH") {
-				faceItHelper.sendNotification('<span class="text-danger"><strong>will now refresh page to prevent match accept bug</strong><hr>Attempting page refresh now...</span>');
+				helper.sendNotification('<span class="text-danger"><strong>will now refresh page to prevent match accept bug</strong><hr>Attempting page refresh now...</span>');
                 setTimeout(function() {
-                	faceItHelper.pageRefresh();
+                	helper.pageRefresh();
                 }, 3000);
 			}
 		}
 
 		if(currentState == "CHECK_IN") {
-			if(faceItHelper.userSettings.bAutoAccept) {
-				faceItHelper.acceptMatch();
+			if(helper.userSettings.bAutoAccept) {
+				helper.acceptMatch();
 			}
 		}
 	},
@@ -399,11 +511,11 @@ var eventStage = {
 
 		if(currentState == "voting") {
 			// Re-fetch the user voting preferences again
-			faceItHelper.fetchMapPreference();
+			helper.fetchMapPreference();
 		}
 
 		if(currentState == "ready") {
-			if(faceItHelper.userSettings.bAutoCopy) {
+			if(helper.userSettings.bAutoCopy) {
 				setTimeout(function() {
 				var btnCopy = $('[clipboard]');
 				// Check if there is any IP for us to copy
@@ -411,29 +523,29 @@ var eventStage = {
 
 	                    var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text();
 	                    debug.log("ServerIP is " + serverIP);
-	                    faceItHelper.copyToClipboard(serverIP);
-	                    faceItHelper.sendNotification('<br><span class="text-success"><strong>IP address copied to clipboard</span></strong>');
+	                    helper.copyToClipboard(serverIP);
+	                    helper.sendNotification('<br><span class="text-success"><strong>IP address copied to clipboard</span></strong>');
 	                    new Audio("https://faceit.poheart.net/sounds/copied.mp3").play();
 	                }
 
             	}, 1000);
 			}
 
-			if(lastState == "configuring" && faceItHelper.userSettings.bAutoJoin) {
+			if(lastState == "configuring" && helper.userSettings.bAutoJoin) {
 				setTimeout(function() {
 					var btnCopy = $('[clipboard]');
 					if(btnCopy.is(":visible") && btnCopy != null) {
 						$(".match-vs__details").append('<div id="joinWarning"><h2><strong><center>AUTO-JOIN SERVER IN <span id="autojoinTimer">10</span> SECONDS</center></strong></h2></div>');
 						var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text().replace("connect ", "");
 						debug.log("ServerIP is " + serverIP);
-						faceItHelper.joinTimer(10, serverIP);
+						helper.joinTimer(10, serverIP);
 					}
 				}, 1000);
 			}
 		}
 
 		if (currentState == "ongoing") {
-			faceItHelper.sendNotification('<h2><span class="text-success"><strong>GLHF!</span></strong></h2>');
+			helper.sendNotification('<h2><span class="text-success"><strong>GLHF!</span></strong></h2>');
 			$("#joinWarning").remove();
 		}
 
@@ -443,23 +555,48 @@ var eventStage = {
 	},
 	OnUserVoteStateChanged: function(isCurrentUserVoting, oldValue) {
 		// This function will be called when user voting access is changed
-		debug.log("Current user voting state is " + isCurrentUserVoting + " & userSettings.bAutoVeto:" + faceItHelper.userSettings.bAutoVeto);
-		if(isCurrentUserVoting && faceItHelper.userSettings.bAutoVeto) {
+		debug.log("Current user voting state is " + isCurrentUserVoting + " & userSettings.bAutoVeto:" + helper.userSettings.bAutoVeto);
+		if(isCurrentUserVoting && helper.userSettings.bAutoVeto) {
 			// Perform ban map
 			setTimeout(function() {
-				for(i=faceItHelper.userSettings.arrayMapOrder.length - 1;i > 0 - 1;i--) {
+				for(i=helper.userSettings.arrayMapOrder.length - 1;i > 0 - 1;i--) {
 		            var bSelected = false;
 		            $(".match-vote-item__name").each(function() {
-		                if ($(this).text() == faceItHelper.userSettings.arrayMapOrder[i] && $(this).parent().find("button").is(":enabled") && !bSelected) {
+		                if ($(this).text() == helper.userSettings.arrayMapOrder[i] && $(this).parent().find("button").is(":enabled") && !bSelected) {
 		                    $(this).parent().find("button").click();
 		                    bSelected = true;
-		                    faceItHelper.sendNotification('<h3>Auto-veto has <span class="text-danger">banned</span> <strong>'+faceItHelper.userSettings.arrayMapOrder[i] + '</strong></h3>');
-		                    debug.log("Auto-veto has banned map " + faceItHelper.userSettings.arrayMapOrder[i]);
+		                    helper.sendNotification('<h3>Auto-veto has <span class="text-danger">banned</span> <strong>'+helper.userSettings.arrayMapOrder[i] + '</strong></h3>');
+		                    debug.log("Auto-veto has banned map " + helper.userSettings.arrayMapOrder[i]);
 		                }
 		            });
 	        	}
 	        }, 1000);
 		}
+	},
+	OnTeamMemberElementUpdate: function() {
+		// Say goodbye if we not in active match room
+		if(!helper.userInMatchRoom()) {
+			return;
+		}
+
+		// Check if injected element exist by counting class
+		if(lobbyStats.isInjected()){
+			return;
+		}
+
+		var roomID = lobbyStats.getRoomGUID();
+		debug.log("Retrived RoomID: " + roomID);
+		// Check if we get 10 enough player data for this room
+		if(!lobbyStats.isDataReady(roomID)) {
+			// fetch data and wait to be called on next update
+			lobbyStats.fetchData();
+			return;
+		}
+
+		// Begin the injection of script
+		lobbyStats.injectContent();
+
+
 	}
 }
 
@@ -497,13 +634,14 @@ var dispatchStateChange = function(currentState, lastState, mode) {
 				eventStage.OnUserVoteStateChanged(currentState, lastState);
 			}
 			break;
+		case "members_elementupdate":
+			eventStage.OnTeamMemberElementUpdate();
+			break;
 		default:
 			console.error("Unknown mode type caught on dispatchStateChange");
 			break;
 	}
-	if(faceItHelper.userInMatchRoom()) {
-		setTimeout(function() { faceItHelper.initMatchRoom() }, 500);
-	}
+
 }
 angular.element(document).ready(function () {
 	// Watch for user stage change
@@ -547,8 +685,23 @@ angular.element(document).ready(function () {
 		}
 	);
 
+	// Prevent injected information being deleted on lobby page
+	$scope.$watch(
+		function () {
+			var teamMemberScope = angular.element('match-team-member > div').scope();
+			if(teamMemberScope && teamMemberScope != null && helper.userInMatchRoom()) {
+				return teamMemberScope;
+			}
+		},
+		function(newValue, oldValue) {
+			dispatchStateChange(newValue, oldValue, "members_elementupdate");
+		}
+	);
+
+
+
 	// Fetch value from localStorage
-	faceItHelper.loadUserSettingsFromStorage();
+	helper.loadUserSettingsFromStorage();
 	// Create button
-	faceItHelper.createButtons();
+	helper.createButtons();
 });
