@@ -223,34 +223,37 @@ var helper = {
 		}
 		var joined_players = angular.element('.queue--sm').scope().quickMatch.joined_players;
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
+		var userGetQueries = []
 		for (var i = 0; i < joined_players.length; i++) {
-			$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
-				var fetchedValue = {
-					guid: e.payload.guid,
-					skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png',
-					country: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
-					nickname: e.payload.nickname,
-					elo: e.payload.games.csgo.faceit_elo,
-					type: e.payload.membership.type,
-					teamid: e.payload.active_team_id
-				};
+			userGetQueries.push(
+				$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
+					var fetchedValue = {
+						guid: e.payload.guid,
+						skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png',
+						country: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
+						nickname: e.payload.nickname,
+						elo: e.payload.games.csgo.faceit_elo,
+						type: e.payload.membership.type,
+						teamid: e.payload.active_team_id
+					};
 
-				var list = $('<li/>').addClass("text-left")
-					.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
-					.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "helper.loadError(this, 'country')" }))
-					.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "helper.loadError(this, 'skills')"}))
-					.append($('<strong/>', {id: fetchedValue.guid , text: fetchedValue.nickname}))
-					.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>');
-					// Temp party indicator - uses first 6 chars of team id as hex colour
-					if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
-						list.append($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + fetchedValue.teamid.substring(0,6) }));
-					}
-				$('#player_list').append(list);
-			}, "json");
+					var list = $('<li/>').addClass("text-left")
+						.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
+						.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "helper.loadError(this, 'country')" }))
+						.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "helper.loadError(this, 'skills')"}))
+						.append($('<strong/>', {id: fetchedValue.guid , text: fetchedValue.nickname}))
+						.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>');
+						// Temp party indicator - uses first 6 chars of team id as hex colour
+						if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
+							list.append($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + fetchedValue.teamid.substring(0,6) }));
+						}
+					$('#player_list').append(list);
+				}, "json")
+			);
 		}
-		setTimeout(function() {
+		$.when.apply($, userGetQueries).done(function() {
 			helper.timerCheckAcceptedPlayers(globalState.user.currentState);
-		}, 1000);
+    	});
 	},
 	timerCheckAcceptedPlayers: function(currentState) {
 		if(currentState != "CHECK_IN" && currentState != "WAITING") {
@@ -355,28 +358,30 @@ var lobbyStats = {
 		}
 
 		lobbyStats.data = [];
+		var playerStatsQueries = [];
 		var roomID = lobbyStats.getRoomGUID();
 		for (var i = 0; i < playerList.length; i++) {
-			$.get('https://api.faceit.com/api/users/'+playerList[i], function(userProfile) {
-				$.get('https://api.faceit.com/stats/api/v1/stats/users/'+userProfile.payload.guid+'/games/csgo', function(userStats) {
-					userProfile = userProfile.payload;
-					lobbyStats.data.push({
-						roomid: roomID,
-						id: userProfile.guid, 
-						nickname: userProfile.nickname,
-						country:  userProfile.country,
-						country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
-						party_id: userProfile.active_team_id,
-						elo: userProfile.games.csgo.faceit_elo
-					});
-				}, "json");
-			}, "json");
+			playerStatsQueries.push(
+					$.get('https://api.faceit.com/api/users/'+playerList[i], function(userProfile) {
+						userProfile = userProfile.payload;
+						lobbyStats.data.push({
+							roomid: roomID,
+							id: userProfile.guid, 
+							nickname: userProfile.nickname,
+							country:  userProfile.country,
+							country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
+							party_id: userProfile.active_team_id,
+							elo: userProfile.games.csgo.faceit_elo
+						});
+					}, "json")
+				);
 		}
-		debug.log("[fetchData] Fetch data completed");
-		setTimeout(function() { 
-			debug.log("[fetchData] Requesting content inject.");
+		 $.when.apply($, playerStatsQueries).done(function() {
+        	debug.log("[fetchData] Fetch data completed");
+        	debug.log("[fetchData] Requesting content inject.");
 			lobbyStats.injectContent();
-		}, 3000);
+    	});
+		
 	},
 	isInjected: function() {
 		var injectCount = $('.helper-stats');
