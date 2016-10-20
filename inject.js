@@ -348,6 +348,56 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	helper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 });
 
+function playerRoomInfo(id) {
+	this.id = id;
+	this.roomid;
+	this.nickname;
+	this.county;
+	this.country_flag;
+	this.party_id;
+	this.elo;
+	this.totalGames;
+	this.avgKills;
+	this.avgHsPer;
+	this.avgKRRatio;
+	this.wins;
+	this.winstreak;
+	this.teamId;
+
+	this.parseProfileData = function(data)
+	{
+		this.roomid = data.roomid;
+        this.nickname = data.nickname;
+        this.country = data.country;
+        this.country_flag = data.country_flag;
+        this.elo = data.elo;
+	}
+
+	this.parseTotalGames = function(data)
+	{
+		this.totalGames = data.totalGames;
+	}
+
+	this.parseAverageData = function(data)
+	{
+		this.avgKills = data.avgKills;
+		this.avgHsPer = data.avgHsPer;
+		this.avgKRRatio = data.avgKRRatio;
+		this.wins = data.wins;
+		this.winstreak = data.winstreak
+	}
+
+	this.parseTeamData = function(data)
+	{
+		this.party_id = data.active_team_id;
+	}
+
+}
+playerRoomInfo.prototype.toString = function()
+{
+    return "id: " + this.id + " roomId: " + roomId + " nickname: "+ this.nickname + " country: " + this.country + " party_id: " + party_id + " elo: " + this.elo + " totalGames: " + this.totalGames + " avgKills: " + this.avgKills + " avgHsPer: " + this.avgHsPer + " avgKRRatio: " + this.avgKRRatio + " wins: " + this.wins + " winstreak: " + this.winstreak + " teamId: " + this.teamId;
+}
+
 var lobbyStats = {
 	statsReady: false,
 	fetchData: function() {
@@ -357,27 +407,123 @@ var lobbyStats = {
 			debug.log("[fetchData] Warning: playerList.length:" + playerList.length + ", insufficient data to process.");
 		}
 
-		lobbyStats.data = [];
+		var profileData = [];
 		var playerStatsQueries = [];
+		var totalGames = [];
+		var averageData = [];
+		var teamData = [];
+
+		lobbyStats.data = {};
+
+
 		var roomID = lobbyStats.getRoomGUID();
 		for (var i = 0; i < playerList.length; i++) {
+			//Initializing players
+			lobbyStats.data[playerList[i]] = new playerRoomInfo(playerList[i]);
+
+			//Player stats
 			playerStatsQueries.push(
 					$.get('https://api.faceit.com/api/users/'+playerList[i], function(userProfile) {
 						userProfile = userProfile.payload;
-						lobbyStats.data.push({
+						profileData.push({
+							id: userProfile.guid,
 							roomid: roomID,
-							id: userProfile.guid, 
 							nickname: userProfile.nickname,
 							country:  userProfile.country,
 							country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
-							party_id: userProfile.active_team_id,
+							//party_id: userProfile.active_team_id, //THIS IS THE PARTY YOU ARE CURRENTLY IN AND NOT THE PARTY YOU WERE IN, IN THE SPECIFIC MATCH. THAT IS FETCHED BELOW
 							elo: userProfile.games.csgo.faceit_elo
 						});
 					}, "json")
 				);
+
+			//Total games:
+			playerStatsQueries.push(
+				$.get('https://api.faceit.com/stats/api/v1/stats/users/'+playerList[i]+'/games/csgo', function(amountGamesData) {
+					totalGames.push({
+						id : amountGamesData.lifetime["_id"].playerId,
+						totalGames:amountGamesData.lifetime.m1
+					});
+				}, "json")
+			);
+
+
+			//Averages of latest games
+			playerStatsQueries.push(
+				$.get("https://api-gateway.faceit.com/stats/api/v1/stats/time/users/" + playerList[i] + "/games/csgo?size=10", function(userMatchData) {
+					var winstreak = 0;
+		            var wins = 0;
+		            var coherent = true;
+		            var avgKills = 0;
+		            var avgHsPer = 0;
+		            var avgKRRatio = 0;
+		            var playerId = "";
+		            for(var m = 0; m<userMatchData.length; m++){
+		                avgKRRatio += parseFloat(userMatchData[m].c3);
+		                avgKills += parseInt(userMatchData[m].i6);
+		                avgHsPer += parseFloat(userMatchData[m].c4);
+		                playerId = userMatchData[m].playerId;
+		                //find winner of game
+		                if(userMatchData[m].i2 === userMatchData[m].teamId)
+					    {
+					        wins++;
+		                    if(coherent)
+		                        winstreak++;
+					    } else
+					    {
+					       coherent = false;
+					    }
+		            }
+
+		            averageData.push({
+		            	id : playerId,
+			            avgKills : Math.round(avgKills/userMatchData.length),
+			            avgHsPer : avgHsPer/userMatchData.length,
+			            avgKRRatio : Math.round(avgKRRatio/userMatchData.length*100)/100,
+			            winstreak : winstreak,
+			            wins : wins,
+		        	});
+				}, "json")
+			);	
 		}
+
+		//Stackinfo, who is playing with who
+		//This is needed because this is the active team_id from this match. The Active team_id in user is what team he currently is in, and not what he was in, in a certain game!
+		$.get('https://api.faceit.com/api/matches/' + roomID, function(data) { 
+			data.payload.faction1.forEach(function(player){
+				teamData.push({
+					id: player.guid,
+					team: player.active_team_id
+				});
+			});
+			data.payload.faction2.forEach(function(player){
+				teamData.push({
+					id: player.guid,
+					team: player.active_team_id
+				});
+			});
+		});
+
 		 $.when.apply($, playerStatsQueries).done(function() {
         	debug.log("[fetchData] Fetch data completed");
+        	debug.log("[fetchData] Merging lists into players");
+
+        	profileData.forEach(function (player) {
+        		lobbyStats.data[player.id].parseProfileData(player);
+        	});
+
+        	totalGames.forEach(function (player) {
+        		lobbyStats.data[player.id].parseTotalGames(player);
+        	});
+
+        	averageData.forEach(function (player) {
+        		lobbyStats.data[player.id].parseAverageData(player);
+        	});
+
+        	teamData.forEach(function (player) {
+        		lobbyStats.data[player.id].parseTeamData(player);
+        	});
+
         	debug.log("[fetchData] Requesting content inject.");
 			lobbyStats.injectContent();
     	});
@@ -389,8 +535,10 @@ var lobbyStats = {
 	},
 	isDataReady: function(roomID) {
 		var validResult = 0;
-		for(var i=0;i<lobbyStats.data.length;i++) {
-			if(lobbyStats.data[i].roomid == roomID) {
+		for(var key in lobbyStats.data)
+		{
+			if(lobbyStats.data[key].roomid == roomId)
+			{
 				validResult++;
 			}
 		}
@@ -439,22 +587,22 @@ var lobbyStats = {
 		var matchPlayers = $(".match-team-member.match-team-member--team");
 
 		debug.log("[injectContent] lobbyStats.data.length: " + lobbyStats.data.length);
-		for(var i=0;i<lobbyStats.data.length;i++) { // Data length
+		for(var key in lobbyStats.data){ // Data length
 			for (var j = 0; j < matchPlayers.length; j++) { // DOM Content team member length
 				var name = $(matchPlayers[j]).find('strong[ng-bind="::teamMember.nickname"]').text();
 				var state = $(matchPlayers[j]).find("span").hasClass("helper-stats");
-				if(name == lobbyStats.data[i].nickname && !state) {
+				if(name == lobbyStats.data[key].nickname && !state) {
 					// Our targered users for this loop
 						var faceitstats_link = "http://faceitstats.com/profile,name," +  name;
 						$(matchPlayers[j]).find('.match-team-member__controls__space')
-							.after($('<img>', { src: lobbyStats.data[i].country_flag, onerror: "helper.loadError(this, 'country')" }))
+							.after($('<img>', { src: lobbyStats.data[key].country_flag, onerror: "helper.loadError(this, 'country')" }))
 						$(matchPlayers[j]).find('.match-team-member__controls--team')
 							.prepend($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
-							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[i].elo, class: "text-info" }));
-						// if(lobbyStats.data[i].party_id) {
+							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[key].elo, class: "text-info" }));
+						// if(lobbyStats.data[key].party_id) {
 						// 	$(matchPlayers[j]).find("strong")
-						// 		.after($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + lobbyStats.data[i].party_id.substring(0,6) }));
+						// 		.after($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + lobbyStats.data[key].party_id.substring(0,6) }));
 						// }
 
 					//break;
