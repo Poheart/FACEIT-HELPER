@@ -348,6 +348,25 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	helper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 });
 
+function playerInfo(id) {
+	this.id = id;
+	this.nickname;
+	this.county;
+	this.country_flag;
+	this.party_id;
+	this.elo;
+	this.totalGames;
+	this.avgKills;
+	this.avgHsPer;
+	this.avgKRRatio;
+	this.wins;
+	this.winstreak;
+}
+playerInfo.prototype.toString = function()
+{
+    return "id: " + this.id + " nickname: "+ this.nickname + " country: " + this.country + " party_id: " + party_id + " elo: " + this.elo + " totalGames: " + this.totalGames + " avgKills: " + this.avgKills + " avgHsPer: " + this.avgHsPer + " avgKRRatio: " + this.avgKRRatio + " wins: " + this.wins + " winstreak: " + this.winstreak;
+}
+
 var lobbyStats = {
 	statsReady: false,
 	fetchData: function() {
@@ -359,14 +378,18 @@ var lobbyStats = {
 
 		lobbyStats.data = [];
 		var playerStatsQueries = [];
+		lobbyStats.totalGames = [];
+		lobbyStats.averageData = [];
+		lobbyStats.teamData = [];
 		var roomID = lobbyStats.getRoomGUID();
 		for (var i = 0; i < playerList.length; i++) {
+			//Player stats
 			playerStatsQueries.push(
 					$.get('https://api.faceit.com/api/users/'+playerList[i], function(userProfile) {
 						userProfile = userProfile.payload;
 						lobbyStats.data.push({
+							id: userProfile.guid,
 							roomid: roomID,
-							id: userProfile.guid, 
 							nickname: userProfile.nickname,
 							country:  userProfile.country,
 							country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
@@ -375,7 +398,77 @@ var lobbyStats = {
 						});
 					}, "json")
 				);
+
+			//Total games:
+			playerStatsQueries.push(
+				$.get('https://api.faceit.com/stats/api/v1/stats/users/'+playerList[i]+'/games/csgo', function(amountGamesData) {
+					lobbyStats.totalGames.push({
+						id : amountGamesData.lifetime["_id"].playerId,
+						totalGames:amountGamesData.lifetime.m1
+					});
+				}, "json")
+			);
+
+
+			//Averages of latest games
+			playerStatsQueries.push(
+				$.get("https://api-gateway.faceit.com/stats/api/v1/stats/time/users/" + playerList[i] + "/games/csgo?size=10", function(userMatchData) {
+					var winstreak = 0;
+		            var wins = 0;
+		            var coherent = true;
+		            var avgKills = 0;
+		            var avgHsPer = 0;
+		            var avgKRRatio = 0;
+		            var playerId = "";
+		            for(var m = 0; m<userMatchData.length; m++){
+		                avgKRRatio += parseFloat(userMatchData[m].c3);
+		                avgKills += parseInt(userMatchData[m].i6);
+		                avgHsPer += parseFloat(userMatchData[m].c4);
+		                playerId = userMatchData[m].playerId;
+		                //find winner of game
+		                if(userMatchData[m].i2 === userMatchData[m].teamId)
+					    {
+					        wins++;
+		                    if(coherent)
+		                        winstreak++;
+					    } else
+					    {
+					       coherent = false;
+					    }
+		            }
+
+		            lobbyStats.averageData.push({
+		            	id : playerId,
+			            avgKills : Math.round(avgKills/userMatchData.length),
+			            avgHsPer : avgHsPer/userMatchData.length,
+			            avgKRRatio : Math.round(avgKRRatio/userMatchData.length*100)/100,
+			            winstreak : winstreak,
+			            wins : wins,
+		        	});
+				}, "json")
+			);	
 		}
+
+		//Stackinfo, who is playing with who
+		//This is needed because this is the active team_id from this match. The Active team_id in user is what team he currently is in, and not what he was in, in a certain game!
+		$.get('https://api.faceit.com/api/matches/' + roomID, function(data) { 
+			data.payload.faction1.forEach(function(player){
+				lobbyStats.teamData.push({
+					id: player.guid,
+					team: player.active_team_id
+				});
+			});
+			data.payload.faction2.forEach(function(player){
+				lobbyStats.teamData.push({
+					id: player.guid,
+					team: player.active_team_id
+				});
+			});
+		});
+
+
+		
+
 		 $.when.apply($, playerStatsQueries).done(function() {
         	debug.log("[fetchData] Fetch data completed");
         	debug.log("[fetchData] Requesting content inject.");
