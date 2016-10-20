@@ -441,13 +441,13 @@ var lobbyStats = {
 		debug.log("[injectContent] lobbyStats.data.length: " + lobbyStats.data.length);
 		for(var i=0;i<lobbyStats.data.length;i++) { // Data length
 			for (var j = 0; j < matchPlayers.length; j++) { // DOM Content team member length
-				var name = $(matchPlayers[j]).find("strong").text();
+				var name = $(matchPlayers[j]).find('strong[ng-bind="::teamMember.nickname"]').text();
 				var state = $(matchPlayers[j]).find("span").hasClass("helper-stats");
 				if(name == lobbyStats.data[i].nickname && !state) {
 					// Our targered users for this loop
 						var faceitstats_link = "http://faceitstats.com/profile,name," +  name;
-						$(matchPlayers[j]).find('.match-team-member__controls--team > div')
-							.after($('<img>', { src: lobbyStats.data[i].country_flag, onerror: "helper.loadError(this, 'country')" }));
+						$(matchPlayers[j]).find('.match-team-member__controls__space')
+							.after($('<img>', { src: lobbyStats.data[i].country_flag, onerror: "helper.loadError(this, 'country')" }))
 						$(matchPlayers[j]).find('.match-team-member__controls--team > a')
 							.after($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
@@ -463,7 +463,7 @@ var lobbyStats = {
 				if(name == "Poheart") {
 				var badge = $(".dev-badge");
 				if(badge.length <= 0) {
-					$(matchPlayers[i]).find(".match-team-member__details__name > div")
+					$(matchPlayers[j]).find(".match-team-member__details__name > div")
 						.prepend($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
 				}
 			}
