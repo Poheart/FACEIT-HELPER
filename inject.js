@@ -1,6 +1,6 @@
 // TODO: Auto server veto
 // TODO: Flags on lobby
-//
+//test
 
 var $scope = angular.element(document).scope();
 
