@@ -366,7 +366,7 @@ var lobbyStats = {
 						userProfile = userProfile.payload;
 						lobbyStats.data.push({
 							roomid: roomID,
-							id: userProfile.guid, 
+							id: userProfile.guid,
 							nickname: userProfile.nickname,
 							country:  userProfile.country,
 							country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
@@ -381,7 +381,7 @@ var lobbyStats = {
         	debug.log("[fetchData] Requesting content inject.");
 			lobbyStats.injectContent();
     	});
-		
+
 	},
 	isInjected: function() {
 		var injectCount = $('.helper-stats');
@@ -431,7 +431,7 @@ var lobbyStats = {
 		}
 		debug.log("[fetchPlayerlist] Pulled " + matchPlayers.length + " data from player list");
 		return matchPlayers;
-		
+
 	},
 	injectContent: function() {
 		var matchScope = angular.element('.match-vs').scope();
@@ -446,8 +446,9 @@ var lobbyStats = {
 				if(name == lobbyStats.data[i].nickname && !state) {
 					// Our targered users for this loop
 						var faceitstats_link = "http://faceitstats.com/profile,name," +  name;
-						$(matchPlayers[j]).find('.match-team-member__controls__space')
-							.after($('<img>', { src: lobbyStats.data[i].country_flag, onerror: "helper.loadError(this, 'country')" }))
+						var flag_style = $(matchPlayers[j]).find('.match-team-member__details').hasClass('match-team-member__details--right') ? "left:initial;right:0;" : "right:initial;left:0;";
+						$(matchPlayers[j]).find('.match-team-member__details__skill')
+							.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+lobbyStats.data[i].fraction, style: flag_style }).append($('<img>', { src: lobbyStats.data[i].country_flag, class: "flag flag--16 skill-icon" })));
 						$(matchPlayers[j]).find('.match-team-member__controls--team')
 							.prepend($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
