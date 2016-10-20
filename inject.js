@@ -448,8 +448,8 @@ var lobbyStats = {
 						var faceitstats_link = "http://faceitstats.com/profile,name," +  name;
 						$(matchPlayers[j]).find('.match-team-member__controls__space')
 							.after($('<img>', { src: lobbyStats.data[i].country_flag, onerror: "helper.loadError(this, 'country')" }))
-						$(matchPlayers[j]).find('.match-team-member__controls--team > a')
-							.after($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
+						$(matchPlayers[j]).find('.match-team-member__controls--team')
+							.prepend($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
 							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[i].elo, class: "text-info" }));
 						// if(lobbyStats.data[i].party_id) {
