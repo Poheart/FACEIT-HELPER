@@ -19,7 +19,7 @@ $(function(){
 
 			chrome.storage.local.set({'lstMapOrder': mapOrder});
 
-			$('.status').html('<strong>Settings saved!</strong>');
+			$('.status').html($('<strong>').text("Setting saved!"));
             $('.title').hide();
             $('.status').show();
 			setTimeout(function() {
