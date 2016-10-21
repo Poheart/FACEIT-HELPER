@@ -356,12 +356,12 @@ function playerRoomInfo(id) {
 	this.country_flag;
 	this.party_id;
 	this.elo;
-	this.totalGames;
-	this.avgKills;
-	this.avgHsPer;
-	this.avgKRRatio;
-	this.wins;
-	this.winstreak;
+	this.totalGames = 0;
+	this.avgKills = 0;
+	this.avgHsPer = 0;
+	this.avgKRRatio = 0;
+	this.wins = 0;
+	this.winstreak = 0;
 	this.teamId;
 	this.faction;
 
@@ -441,10 +441,14 @@ var lobbyStats = {
 			//Total games:
 			playerStatsQueries.push(
 				$.get('https://api.faceit.com/stats/api/v1/stats/users/'+playerList[i]+'/games/csgo', function(amountGamesData) {
-					totalGames.push({
-						id : amountGamesData.lifetime["_id"].playerId,
-						totalGames:amountGamesData.lifetime.m1
-					});
+					if(amountGamesData.lifetime.hasOwnProperty("_id"))
+					{
+						totalGames.push({
+							id : amountGamesData.lifetime["_id"].playerId,
+							totalGames:amountGamesData.lifetime.m1
+						});
+					}
+					
 				}, "json")
 			);
 
@@ -452,6 +456,11 @@ var lobbyStats = {
 			//Averages of latest games
 			playerStatsQueries.push(
 				$.get("https://api-gateway.faceit.com/stats/api/v1/stats/time/users/" + playerList[i] + "/games/csgo?size=10", function(userMatchData) {
+					//no stats recoreded
+					if(userMatchData.length == 0)
+					{
+						return;
+					}
 					var winstreak = 0;
 		            var wins = 0;
 		            var coherent = true;
