@@ -448,7 +448,7 @@ var lobbyStats = {
 							totalGames:amountGamesData.lifetime.m1
 						});
 					}
-					
+
 				}, "json")
 			);
 
@@ -632,14 +632,14 @@ var lobbyStats = {
 				if(name == lobbyStats.data[key].nickname && !state) {
 					// Our targered users for this loop
 						var faceitstats_link = "http://faceitstats.com/profile,name," +  name;
-						var flag_style = $(matchPlayers[j]).find('.match-team-member__details').hasClass('match-team-member__details--right') ? "left:initial;right:0;" : "right:initial;left:0;";
-						$(matchPlayers[j]).find('.match-team-member__details__skill')
-							.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: lobbyStats.data[key].country_flag, class: "flag flag--16 skill-icon", onerror: "helper.loadError(this, 'country')" })));
+						$(matchPlayers[j]).find('.match-team-member__details__league')
+							.attr('style','display:flex;flex-direction:column;justify-direction:space-between;align-items:center;')
+							.append($('<img>', { src: lobbyStats.data[key].country_flag, class: "flag flag--16 skill-icon", onerror: "helper.loadError(this, 'country')" }));
 						$(matchPlayers[j]).find('.match-team-member__controls--team')
 							.prepend($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
 							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[key].elo, class: "text-info" }));
-						
+
 
 						var border = ""
 						if(lobbyStats.data[key].faction == 1 )
