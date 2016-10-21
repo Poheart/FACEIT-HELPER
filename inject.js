@@ -363,6 +363,7 @@ function playerRoomInfo(id) {
 	this.wins;
 	this.winstreak;
 	this.teamId;
+	this.faction;
 
 	this.parseProfileData = function(data)
 	{
@@ -389,13 +390,14 @@ function playerRoomInfo(id) {
 
 	this.parseTeamData = function(data)
 	{
-		this.party_id = data.active_team_id;
+		this.party_id = data.team;
+		this.faction = data.faction;
 	}
 
 }
 playerRoomInfo.prototype.toString = function()
 {
-    return "id: " + this.id + " roomId: " + roomId + " nickname: "+ this.nickname + " country: " + this.country + " party_id: " + party_id + " elo: " + this.elo + " totalGames: " + this.totalGames + " avgKills: " + this.avgKills + " avgHsPer: " + this.avgHsPer + " avgKRRatio: " + this.avgKRRatio + " wins: " + this.wins + " winstreak: " + this.winstreak + " teamId: " + this.teamId;
+    return "id: " + this.id + " roomId: " + roomId + " nickname: "+ this.nickname + " country: " + this.country + " party_id: " + party_id + " elo: " + this.elo + " totalGames: " + this.totalGames + " avgKills: " + this.avgKills + " avgHsPer: " + this.avgHsPer + " avgKRRatio: " + this.avgKRRatio + " wins: " + this.wins + " winstreak: " + this.winstreak + " teamId: " + this.teamId + " faction: " + this.faction;
 }
 
 var lobbyStats = {
@@ -492,13 +494,15 @@ var lobbyStats = {
 			data.payload.faction1.forEach(function(player){
 				teamData.push({
 					id: player.guid,
-					team: player.active_team_id
+					team: player.active_team_id,
+					faction: 1
 				});
 			});
 			data.payload.faction2.forEach(function(player){
 				teamData.push({
 					id: player.guid,
-					team: player.active_team_id
+					team: player.active_team_id,
+					faction: 2
 				});
 			});
 		});
@@ -581,6 +585,32 @@ var lobbyStats = {
 
 	},
 	injectContent: function() {
+
+		//should probably have a separate file to helper methods, but dont know who to create so i'll place here for now
+		function mix(a, b, v)
+		{
+		    return (1-v)*a + v*b;
+		}
+
+		function HSVtoRGB(H, S, V)
+		{
+			if(H > 270)
+			{
+				H = H-270
+			}
+		    var V2 = V * (1 - S);
+		    var r  = ((H>=0 && H<=60) || (H>=300 && H<=360)) ? V : ((H>=120 && H<=240) ? V2 : ((H>=60 && H<=120) ? mix(V,V2,(H-60)/60) : ((H>=240 && H<=300) ? mix(V2,V,(H-240)/60) : 0)));
+		    var g  = (H>=60 && H<=180) ? V : ((H>=240 && H<=360) ? V2 : ((H>=0 && H<=60) ? mix(V2,V,H/60) : ((H>=180 && H<=240) ? mix(V,V2,(H-180)/60) : 0)));
+		    var b  = (H>=0 && H<=120) ? V2 : ((H>=180 && H<=300) ? V : ((H>=120 && H<=180) ? mix(V2,V,(H-120)/60) : ((H>=300 && H<=360) ? mix(V,V2,(H-300)/60) : 0)));
+
+		    return {
+		        r : Math.round(r * 255),
+		        g : Math.round(g * 255),
+		        b : Math.round(b * 255)
+		    };
+		}
+
+
 		var matchScope = angular.element('.match-vs').scope();
 
 		var matchPlayers = $(".match-team-member.match-team-member--team");
@@ -600,6 +630,35 @@ var lobbyStats = {
 							.prepend($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
 							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[key].elo, class: "text-info" }));
+						
+
+						var border = ""
+						if(lobbyStats.data[key].faction == 1 )
+						{
+							border = "left";
+						} else
+						{
+							border = "right";
+						}
+
+						//hashing teamId
+						var hash = 0;
+						//checking if in no team
+						if(lobbyStats.data[key].party_id == null)
+						{
+							hash = Math.random()*100;
+						} else {
+						    for (var i = 0; i < lobbyStats.data[key].party_id.length; i++) {
+						       hash = lobbyStats.data[key].party_id.charCodeAt(i) + ((hash << 5) - hash);
+						    }
+						}
+
+					    var inRange = Math.abs(hash%360);
+					    //http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+					    var rgb = HSVtoRGB(inRange , 0.5, 0.7);
+					    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
+						$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
+
 						// if(lobbyStats.data[key].party_id) {
 						// 	$(matchPlayers[j]).find("strong")
 						// 		.after($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + lobbyStats.data[key].party_id.substring(0,6) }));
