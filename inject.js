@@ -540,7 +540,7 @@ var lobbyStats = {
 		var validResult = 0;
 		for(var key in lobbyStats.data)
 		{
-			if(lobbyStats.data[key].roomid == roomId)
+			if(lobbyStats.data[key].roomid == roomID)
 			{
 				validResult++;
 			}
