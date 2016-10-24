@@ -53,6 +53,7 @@ var helper = {
 		bAutoVeto: false,
 		bPremium: false,
 		bMatchedPlayers: false,
+		bShowStats: false,
 		arrayMapOrder: { }
 	},
 	buttons: [
@@ -138,6 +139,19 @@ var helper = {
 				var txtState = helper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 			    $("#sAutoJoin").html(txtState);
 			}
+		},
+		{
+			id: "btnShowStats",
+			icon: "icon-stats",
+			text: "Show extended stats ",
+			stateId: "sShowStats",
+			action: function() {
+				helper.userSettings.bShowStats = !helper.userSettings.bShowStats;
+				localStorage.bShowStats = helper.userSettings.bShowStats;
+
+				var txtState = helper.userSettings.bShowStats ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+			    $("#sShowStats").html(txtState);
+			}
 		}
 	],
 	createButtons: function() {
@@ -181,6 +195,9 @@ var helper = {
 
 	    txtState = helper.userSettings.bAutoJoin ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
 	    $("#sAutoJoin").html(txtState);
+
+	    txtState = helper.userSettings.bShowStats ? $('<span/>',{class:"text-success",text:"Enabled"}) : $('<span/>',{class:"text-danger",text:"Disabled"});
+	    $("#sShowStats").html(txtState);
 	},
 	copyToClipboard: function(text) {
 		document.dispatchEvent(new CustomEvent('FH_copyServerIP', {
@@ -320,6 +337,7 @@ var helper = {
 		helper.userSettings.bPremium = localStorage.bPremium == "true" ? true : false;
 		helper.userSettings.bMatchedPlayers = localStorage.bMatchedPlayers == "true" ? true : false;
 		helper.userSettings.bAutoJoin = localStorage.bAutoJoin == "true" ? true : false;
+		helper.userSettings.bShowStats = localStorage.bShowStats == "true" ? true : false;
 		// Fetch user map preferences
 		helper.fetchMapPreference();
 	},
@@ -516,7 +534,7 @@ var lobbyStats = {
 			});
 		});
 
-		 $.when.apply($, playerStatsQueries).done(function() {
+		 $.when.apply($, playerStatsQueries).then(function() {
         	debug.log("[fetchData] Fetch data completed");
         	debug.log("[fetchData] Merging lists into players");
 
@@ -531,7 +549,6 @@ var lobbyStats = {
         	averageData.forEach(function (player) {
         		lobbyStats.data[player.id].parseAverageData(player);
         	});
-
         	teamData.forEach(function (player) {
         		lobbyStats.data[player.id].parseTeamData(player);
         	});
@@ -619,7 +636,30 @@ var lobbyStats = {
 		    };
 		}
 
+		//show average teamElo
+		var faction1 = 0;
+		var faction1Count = 0;
+		var faction2 = 0;
+		var faction2Count = 0;
+		for(var key in lobbyStats.data){
+			var player = lobbyStats.data[key];
+			if(player.faction == 1)
+			{
+				faction1 += player.elo;
+				faction1Count++;
+			}
+			if(player.faction == 2)
+			{
+				faction2 += player.elo;
+				faction2Count++;
+			}
+		}
+		faction1 = Math.round(faction1/faction1Count);
+		faction2 = Math.round(faction2/faction2Count);
 
+		$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - ELO:" + faction1));
+		$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - ELO:" + faction2));
+							
 		var matchScope = angular.element('.match-vs').scope();
 
 		var matchPlayers = $(".match-team-member.match-team-member--team");
@@ -667,6 +707,23 @@ var lobbyStats = {
 					    var rgb = HSVtoRGB(inRange , 0.5, 0.7);
 					    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
 						$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
+
+						if(helper.userSettings.bShowStats)
+						{				
+							var container = $("<div>").css({'border-top' : '1px solid #e2e4e6',
+															'padding' : '3px 2px 2px 5px'});
+							var statCss = {'margin' : '0', 'padding' : '0', 'width' : '100%'}
+							var winNode = $("<p>").css(statCss).html("Wins: <strong>" + lobbyStats.data[key].wins + "</strong> - Winstreak: <strong>" + lobbyStats.data[key].winstreak + "</strong>");
+							var statNode = $("<p>").css(statCss).html("Avg. kills: <strong>" + lobbyStats.data[key].avgKills + "</strong> - Avg. hs%: <strong>" + lobbyStats.data[key].avgHsPer + "</strong>");
+							var statNode2 = $("<p>").css(statCss).html("Avg. K/R: <strong>" + lobbyStats.data[key].avgKRRatio + "</strong> - Games: <strong>" + lobbyStats.data[key].totalGames + "</strong>");
+
+                   			container.append(winNode);
+                   			container.append(statNode);
+                   			container.append(statNode2);
+
+                   			$(matchPlayers[j]).append(container);
+						}
+
 
 						// if(lobbyStats.data[key].party_id) {
 						// 	$(matchPlayers[j]).find("strong")
