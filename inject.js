@@ -549,7 +549,6 @@ var lobbyStats = {
         	averageData.forEach(function (player) {
         		lobbyStats.data[player.id].parseAverageData(player);
         	});
-        	console.log("lENGHT: " + teamData.length);
         	teamData.forEach(function (player) {
         		lobbyStats.data[player.id].parseTeamData(player);
         	});
@@ -657,7 +656,6 @@ var lobbyStats = {
 		}
 		faction1 = Math.round(faction1/faction1Count);
 		faction2 = Math.round(faction2/faction2Count);
-		console.log(faction1);
 
 		$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - ELO:" + faction1));
 		$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - ELO:" + faction2));
@@ -711,33 +709,17 @@ var lobbyStats = {
 						$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
 
 						if(helper.userSettings.bShowStats)
-						{
-							var container = document.createElement("div");
-		                    container.style.borderTop = "1px solid #e2e4e6";
-		                    container.style.padding = "3px 2px 2px 5px"
+						{				
+							var container = $("<div>").css({'border-top' : '1px solid #e2e4e6',
+															'padding' : '3px 2px 2px 5px'});
+							var statCss = {'margin' : '0', 'padding' : '0', 'width' : '100%'}
+							var winNode = $("<p>").css(statCss).html("Wins: <strong>" + lobbyStats.data[key].wins + "</strong> - Winstreak: <strong>" + lobbyStats.data[key].winstreak + "</strong>");
+							var statNode = $("<p>").css(statCss).html("Avg. kills: <strong>" + lobbyStats.data[key].avgKills + "</strong> - Avg. hs%: <strong>" + lobbyStats.data[key].avgHsPer + "</strong>");
+							var statNode2 = $("<p>").css(statCss).html("Avg. K/R: <strong>" + lobbyStats.data[key].avgKRRatio + "</strong> - Games: <strong>" + lobbyStats.data[key].totalGames + "</strong>");
 
-		                    var winNode = document.createElement("p");
-		                    winNode.style.margin = "0";
-		                    winNode.style.padding = "0";
-		                    winNode.style.width = "100%";
-		                    winNode.innerHTML = "Wins: <strong>" + lobbyStats.data[key].wins + "</strong> - Winstreak: <strong>" + lobbyStats.data[key].winstreak + "</strong>";
-
-		                    var statNode = document.createElement("p");
-		                    statNode.style.margin = "0";
-		                    statNode.style.padding = "0";
-		                    statNode.style.width = "100%";
-		                    statNode.innerHTML = "Avg. kills: <strong>" + lobbyStats.data[key].avgKills + "</strong> - Avg. hs%: <strong>" + lobbyStats.data[key].avgHsPer + "</strong>";
-
-		                    var statNode2 = document.createElement("p");
-		                    statNode2.style.margin = "0";
-		                    statNode2.style.padding = "0";
-		                    statNode2.style.width = "100%";
-
-   		                    statNode2.innerHTML = "Avg. K/R: <strong>" + lobbyStats.data[key].avgKRRatio + "</strong> - Games: <strong>" + lobbyStats.data[key].totalGames + "</strong>";
-
-                   			container.appendChild(winNode);
-                   			container.appendChild(statNode);
-                   			container.appendChild(statNode2);
+                   			container.append(winNode);
+                   			container.append(statNode);
+                   			container.append(statNode2);
 
                    			$(matchPlayers[j]).append(container);
 						}
