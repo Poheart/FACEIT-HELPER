@@ -694,7 +694,7 @@ var lobbyStats = {
 						var partyid = lobbyStats.data[key].party_id;
 						if(partyid == null)
 						{
-							partyid = Math.random()*100;
+							partyid = lobbies.length;
 							lobbies.push(partyid);
 						} else 
 						{
