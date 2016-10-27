@@ -701,7 +701,7 @@ var lobbyStats = {
 					    var inRange = colors[lobbies.indexOf(partyid)];
 						
 					    //http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-					    var rgb = HSVtoRGB(inRange , 1.0, 0.8);
+					    var rgb = HSVtoRGB(inRange , 0.9, 0.6);
 					    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
 						$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
 
