@@ -620,10 +620,6 @@ var lobbyStats = {
 
 		function HSVtoRGB(H, S, V)
 		{
-			if(H > 270)
-			{
-				H = H-270
-			}
 		    var V2 = V * (1 - S);
 		    var r  = ((H>=0 && H<=60) || (H>=300 && H<=360)) ? V : ((H>=120 && H<=240) ? V2 : ((H>=60 && H<=120) ? mix(V,V2,(H-60)/60) : ((H>=240 && H<=300) ? mix(V2,V,(H-240)/60) : 0)));
 		    var g  = (H>=60 && H<=180) ? V : ((H>=240 && H<=360) ? V2 : ((H>=0 && H<=60) ? mix(V2,V,H/60) : ((H>=180 && H<=240) ? mix(V,V2,(H-180)/60) : 0)));
@@ -665,6 +661,7 @@ var lobbyStats = {
 		var matchPlayers = $(".match-team-member.match-team-member--team");
 
 		debug.log("[injectContent] lobbyStats.data.length: " + lobbyStats.data.length);
+		var lobbies = [];
 		for(var key in lobbyStats.data){ // Data length
 			for (var j = 0; j < matchPlayers.length; j++) { // DOM Content team member length
 				var name = $(matchPlayers[j]).find('strong[ng-bind="::teamMember.nickname"]').text();
@@ -690,21 +687,21 @@ var lobbyStats = {
 							border = "right";
 						}
 
-						//hashing teamId
-						var hash = 0;
-						//checking if in no team
-						if(lobbyStats.data[key].party_id == null)
+						var partyid = lobbyStats.data[key].party_id;
+						if(partyid == null)
 						{
-							hash = Math.random()*100;
-						} else {
-						    for (var i = 0; i < lobbyStats.data[key].party_id.length; i++) {
-						       hash = lobbyStats.data[key].party_id.charCodeAt(i) + ((hash << 5) - hash);
-						    }
+							partyid = lobbies.length;
+							lobbies.push(partyid);
+						} else 
+						{
+						    if (lobbies.indexOf(partyid) == -1)
+								lobbies.push(partyid);
 						}
-
-					    var inRange = Math.abs(hash%360);
+						var colors = [0, 60, 120, 180, 240, 300, 30, 270, 210, 90];
+					    var inRange = colors[lobbies.indexOf(partyid)];
+						
 					    //http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-					    var rgb = HSVtoRGB(inRange , 0.5, 0.7);
+					    var rgb = HSVtoRGB(inRange , 0.9, 0.6);
 					    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
 						$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
 
