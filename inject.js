@@ -1,7 +1,3 @@
-// TODO: Auto server veto
-// TODO: Flags on lobby
-//
-
 var $scope = angular.element(document).scope();
 
 if($scope) {
@@ -315,7 +311,7 @@ var helper = {
 	        	clearInterval(timerHandle);
 	        	// In case client changed their mind...
 	        	if(helper.userSettings.bAutoJoin) {
-		        	helper.sendNotification('<br><span class="text-success"><strong><h2>AUTO JOINNING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small></strong>');
+		        	helper.sendNotification('<br><span class="text-success"><strong><h2>AUTO JOINING THE GAME SERVER</h2></span><h3>Please wait....</h3><small>Your game will be started shortly</small></strong>');
 		            helper.joinServer(serverIP);
 		            $("#joinWarning").html('<h2><strong class="text-success"><center>YOU WILL BE CONNECTED TO THE SERVER MOMENTARILY</center></strong></h2>');
 		            new Audio("https://faceit.poheart.net/sounds/autojoin_confirm.mp3").play();
@@ -347,7 +343,7 @@ var helper = {
 	loadError: function(img, type) {
 		if(type == "country") {
 			img.onerror = null;
-			img.src = "https://faceit.poheart.net/images/country-notfound.png";
+			img.src = "https://cdn.faceit.com/frontend/244/assets/images/flags/undefined.png";
 		} else if(type == "skills") {
 			img.onerror = null;
 			img.src = "https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_0_sm.png";
@@ -383,8 +379,7 @@ function playerRoomInfo(id) {
 	this.teamId;
 	this.faction;
 
-	this.parseProfileData = function(data)
-	{
+	this.parseProfileData = function(data) {
 		this.roomid = data.roomid;
         this.nickname = data.nickname;
         this.country = data.country;
@@ -392,13 +387,11 @@ function playerRoomInfo(id) {
         this.elo = data.elo;
 	}
 
-	this.parseTotalGames = function(data)
-	{
+	this.parseTotalGames = function(data) {
 		this.totalGames = data.totalGames;
 	}
 
-	this.parseAverageData = function(data)
-	{
+	this.parseAverageData = function(data) {
 		this.avgKills = data.avgKills;
 		this.avgHsPer = data.avgHsPer;
 		this.avgKRRatio = data.avgKRRatio;
@@ -406,15 +399,13 @@ function playerRoomInfo(id) {
 		this.winstreak = data.winstreak
 	}
 
-	this.parseTeamData = function(data)
-	{
+	this.parseTeamData = function(data) {
 		this.party_id = data.team;
 		this.faction = data.faction;
 	}
 
 }
-playerRoomInfo.prototype.toString = function()
-{
+playerRoomInfo.prototype.toString = function() {
     return "id: " + this.id + " roomId: " + roomId + " nickname: "+ this.nickname + " country: " + this.country + " party_id: " + party_id + " elo: " + this.elo + " totalGames: " + this.totalGames + " avgKills: " + this.avgKills + " avgHsPer: " + this.avgHsPer + " avgKRRatio: " + this.avgKRRatio + " wins: " + this.wins + " winstreak: " + this.winstreak + " teamId: " + this.teamId + " faction: " + this.faction;
 }
 
@@ -466,7 +457,7 @@ var lobbyStats = {
 							totalGames:amountGamesData.lifetime.m1
 						});
 					}
-					
+
 				}, "json")
 			);
 
@@ -475,8 +466,7 @@ var lobbyStats = {
 			playerStatsQueries.push(
 				$.get("https://api-gateway.faceit.com/stats/api/v1/stats/time/users/" + playerList[i] + "/games/csgo?size=10", function(userMatchData) {
 					//no stats recoreded
-					if(userMatchData.length == 0)
-					{
+					if(userMatchData.length == 0) {
 						return;
 					}
 					var winstreak = 0;
@@ -492,13 +482,12 @@ var lobbyStats = {
 		                avgHsPer += parseFloat(userMatchData[m].c4);
 		                playerId = userMatchData[m].playerId;
 		                //find winner of game
-		                if(userMatchData[m].i2 === userMatchData[m].teamId)
-					    {
+		                if(userMatchData[m].i2 === userMatchData[m].teamId) {
 					        wins++;
-		                    if(coherent)
-		                        winstreak++;
-					    } else
-					    {
+		                    if(coherent) {
+								winstreak++;
+							}
+					    } else {
 					       coherent = false;
 					    }
 		            }
@@ -534,28 +523,28 @@ var lobbyStats = {
 			});
 		});
 
-		 $.when.apply($, playerStatsQueries).then(function() {
-        	debug.log("[fetchData] Fetch data completed");
-        	debug.log("[fetchData] Merging lists into players");
+		$.when.apply($, playerStatsQueries).then(function() {
+			debug.log("[fetchData] Fetch data completed");
+			debug.log("[fetchData] Merging lists into players");
 
-        	profileData.forEach(function (player) {
-        		lobbyStats.data[player.id].parseProfileData(player);
-        	});
+			profileData.forEach(function (player) {
+			lobbyStats.data[player.id].parseProfileData(player);
+		});
 
-        	totalGames.forEach(function (player) {
-        		lobbyStats.data[player.id].parseTotalGames(player);
-        	});
+		totalGames.forEach(function (player) {
+			lobbyStats.data[player.id].parseTotalGames(player);
+		});
 
-        	averageData.forEach(function (player) {
-        		lobbyStats.data[player.id].parseAverageData(player);
-        	});
-        	teamData.forEach(function (player) {
-        		lobbyStats.data[player.id].parseTeamData(player);
-        	});
+		averageData.forEach(function (player) {
+			lobbyStats.data[player.id].parseAverageData(player);
+		});
+		teamData.forEach(function (player) {
+			lobbyStats.data[player.id].parseTeamData(player);
+		});
 
-        	debug.log("[fetchData] Requesting content inject.");
+		debug.log("[fetchData] Requesting content inject.");
 			lobbyStats.injectContent();
-    	});
+		});
 
 	},
 	isInjected: function() {
@@ -564,10 +553,8 @@ var lobbyStats = {
 	},
 	isDataReady: function(roomID) {
 		var validResult = 0;
-		for(var key in lobbyStats.data)
-		{
-			if(lobbyStats.data[key].roomid == roomID)
-			{
+		for(var key in lobbyStats.data) {
+			if(lobbyStats.data[key].roomid == roomID) {
 				validResult++;
 			}
 		}
@@ -582,7 +569,6 @@ var lobbyStats = {
 			return false;
 		}
 		return matchScope.match.guid;
-
 	},
 	fetchPlayerlist: function() {
 		var matchPlayers = [];
@@ -613,13 +599,11 @@ var lobbyStats = {
 	injectContent: function() {
 
 		//should probably have a separate file to helper methods, but dont know who to create so i'll place here for now
-		function mix(a, b, v)
-		{
+		function mix(a, b, v) {
 		    return (1-v)*a + v*b;
 		}
 
-		function HSVtoRGB(H, S, V)
-		{
+		function HSVtoRGB(H, S, V) {
 		    var V2 = V * (1 - S);
 		    var r  = ((H>=0 && H<=60) || (H>=300 && H<=360)) ? V : ((H>=120 && H<=240) ? V2 : ((H>=60 && H<=120) ? mix(V,V2,(H-60)/60) : ((H>=240 && H<=300) ? mix(V2,V,(H-240)/60) : 0)));
 		    var g  = (H>=60 && H<=180) ? V : ((H>=240 && H<=360) ? V2 : ((H>=0 && H<=60) ? mix(V2,V,H/60) : ((H>=180 && H<=240) ? mix(V,V2,(H-180)/60) : 0)));
@@ -639,13 +623,11 @@ var lobbyStats = {
 		var faction2Count = 0;
 		for(var key in lobbyStats.data){
 			var player = lobbyStats.data[key];
-			if(player.faction == 1)
-			{
+			if(player.faction == 1) {
 				faction1 += player.elo;
 				faction1Count++;
 			}
-			if(player.faction == 2)
-			{
+			if(player.faction == 2) {
 				faction2 += player.elo;
 				faction2Count++;
 			}
@@ -655,7 +637,7 @@ var lobbyStats = {
 
 		$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - ELO:" + faction1));
 		$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - ELO:" + faction2));
-							
+
 		var matchScope = angular.element('.match-vs').scope();
 
 		var matchPlayers = $(".match-team-member.match-team-member--team");
@@ -676,40 +658,30 @@ var lobbyStats = {
 							.prepend($($('<a>', { target: "_blank", class: "match-team-member__controls__button helper-stats" ,href: faceitstats_link }).append($('<i>', { class:"icon-ic-social-facebook" } ))));
 						$(matchPlayers[j]).find('.match-team-member__details__name > div')
 							.append($('<br>')).append($('<strong>', { text: "ELO: " + lobbyStats.data[key].elo, class: "text-info" }));
-						
 
-						var border = ""
-						if(lobbyStats.data[key].faction == 1 )
-						{
-							border = "left";
-						} else
-						{
-							border = "right";
-						}
+
 
 						var partyid = lobbyStats.data[key].party_id;
-						if(partyid == null)
-						{
+						if(partyid == null) {
 							partyid = lobbies.length;
 							lobbies.push(partyid);
-						} else 
-						{
-						    if (lobbies.indexOf(partyid) == -1)
+						} else {
+						    if (lobbies.indexOf(partyid) == -1) {
 								lobbies.push(partyid);
+							}
 						}
 						var colors = [0, 60, 120, 180, 240, 300, 30, 270, 210, 90];
 					    var inRange = colors[lobbies.indexOf(partyid)];
-						
+
 					    //http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 					    var rgb = HSVtoRGB(inRange , 0.9, 0.6);
 					    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
+						var border = (lobbyStats.data[key].faction == 1 ) ? "left" : "right";
 						$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
 
-						if(helper.userSettings.bShowStats)
-						{				
-							var container = $("<div>").css({'border-top' : '1px solid #e2e4e6',
-															'padding' : '3px 2px 2px 5px'});
-							var statCss = {'margin' : '0', 'padding' : '0', 'width' : '100%'}
+						if(helper.userSettings.bShowStats) {
+							var container = $("<div>").css({'border-top' : '1px solid #e2e4e6','padding' : '3px 2px 2px 5px'});
+							var statCss = {'margin' : '0', 'padding' : '0', 'width' : '100%'};
 							var winNode = $("<p>").css(statCss).html("Wins: <strong>" + lobbyStats.data[key].wins + "</strong> - Winstreak: <strong>" + lobbyStats.data[key].winstreak + "</strong>");
 							var statNode = $("<p>").css(statCss).html("Avg. kills: <strong>" + lobbyStats.data[key].avgKills + "</strong> - Avg. hs%: <strong>" + lobbyStats.data[key].avgHsPer + "</strong>");
 							var statNode2 = $("<p>").css(statCss).html("Avg. K/R: <strong>" + lobbyStats.data[key].avgKRRatio + "</strong> - Games: <strong>" + lobbyStats.data[key].totalGames + "</strong>");
@@ -720,23 +692,15 @@ var lobbyStats = {
 
                    			$(matchPlayers[j]).append(container);
 						}
-
-
-						// if(lobbyStats.data[key].party_id) {
-						// 	$(matchPlayers[j]).find("strong")
-						// 		.after($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + lobbyStats.data[key].party_id.substring(0,6) }));
-						// }
-
-					//break;
 				}
 
 				if(name == "Poheart") {
-				var badge = $(".dev-badge");
-				if(badge.length <= 0) {
-					$(matchPlayers[j]).find(".match-team-member__details__name > div")
-						.prepend($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
+					var badge = $(".dev-badge");
+					if(badge.length <= 0) {
+						$(matchPlayers[j]).find(".match-team-member__details__name > div")
+							.prepend($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
+					}
 				}
-			}
 
 			}
 		}
@@ -795,7 +759,6 @@ var eventStage = {
 				var btnCopy = $('[clipboard]');
 				// Check if there is any IP for us to copy
 	                if(btnCopy.is(":visible") && btnCopy != null) {
-
 	                    var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text();
 	                    debug.log("ServerIP is " + serverIP);
 	                    helper.copyToClipboard(serverIP);
