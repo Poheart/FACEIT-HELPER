@@ -1,0 +1,24 @@
+body {
+    margin: 0;
+    min-width: 220px;
+}
+header {
+    height: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #1a1a1a;
+    color: #fff;
+}
+sup {
+    margin-left: 1px;
+    vertical-align: text-top;
+}
+h2, h4 {
+    margin: 0;
+}
+.items {
+    border: 1px solid black;
+    padding: 5px;
+    margin: 5px;
+}
