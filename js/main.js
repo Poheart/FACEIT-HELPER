@@ -20,7 +20,7 @@ var injectScript = function(script) {
 
 $(document).ready(function() {
 	var manifest = chrome.runtime.getManifest();
-    injectScript('inject.js');
+    injectScript('js/inject.js');
      $('[ng-if="version"] small').attr("id", "helperDebug").append('<br>HELPER v <strong>' + manifest.version + '</strong>');
 });
 

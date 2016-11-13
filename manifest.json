@@ -11,20 +11,20 @@
             "38": "icons/icon38.png"
         },
         "default_title": "FACEIT Experience enhancement",
-        "default_popup": "popup.html"
+        "default_popup": "html/popup.html"
     },
   "background": {
-        "scripts": ["background.js"]
+        "scripts": ["js/background.js"]
     },
   "content_scripts": [
     {
       "matches": ["https://www.faceit.com/*"],
-      "js": ["jquery.js", "main.js"],
+      "js": ["lib/jquery.js", "js/main.js"],
       "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
-        "inject.js"
+        "js/inject.js"
     ],
   "icons": {
     "16": "icons/icon16.png",
