@@ -1,11 +1,11 @@
 {
-  "manifest_version": 2,
+    "manifest_version": 2,
 
-  "name": "FACEIT HELPER",
-  "description": "FACEIT user experience enhancement tools",
-  "version": "3.2.4",
-  "author": "Poheart & CullenIO",
-  "page_action": {
+    "name": "FACEIT HELPER",
+    "description": "FACEIT user experience enhancement tools",
+    "version": "3.2.4",
+    "author": "Poheart & CullenIO",
+    "page_action": {
         "default_icon": {
             "19": "icons/icon19.png",
             "38": "icons/icon38.png"
@@ -13,30 +13,28 @@
         "default_title": "FACEIT Experience enhancement",
         "default_popup": "html/popup.html"
     },
-  "background": {
+    "background": {
         "scripts": ["js/background.js"]
     },
-  "content_scripts": [
-    {
-      "matches": ["https://www.faceit.com/*"],
-      "js": ["lib/jquery.js", "js/main.js"],
-      "run_at": "document_end"
-    }
-  ],
-  "web_accessible_resources": [
+    "content_scripts": [{
+        "matches": ["https://www.faceit.com/*"],
+        "js": ["lib/jquery.min.js", "js/main.js"],
+        "run_at": "document_end"
+    }],
+    "web_accessible_resources": [
         "js/inject.js"
     ],
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
-  "permissions": [
-    "<all_urls>",
-    "webRequest",
-    "webRequestBlocking",
-    "activeTab",
-    "storage",
-    "clipboardWrite"
-  ]
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
+        "<all_urls>",
+        "webRequest",
+        "webRequestBlocking",
+        "activeTab",
+        "storage",
+        "clipboardWrite"
+    ]
 }
