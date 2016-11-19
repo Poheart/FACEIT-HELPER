@@ -265,7 +265,7 @@ var faceitHelper = {
 		var btnContinue = $('.modal-dialog__header__title[translate-once="QUICK-MATCH-QUEUING"]').parent().parent().find('button[translate-once="CONTINUE"]');
         if(btnContinue != null && btnContinue.is(":visible")) {
             btnContinue.click();
-            faceitHelper.sendNotification('<span class="text-warning"><strong>is now queuing for a match...</strong><br></span>');
+            faceitHelper.sendNotification('<span class="text-primary"><strong>is now queuing for a match...</strong><br></span>');
         }
 		// You have been placed in queue..etc
 	},
@@ -773,7 +773,7 @@ var faceitHelper = {
 						    var inRange = colors[lobbies.indexOf(partyid)];
 
 						    //http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-						    var rgb = global.HSVtoRGB(inRange , 0.9, 0.6);
+						    var rgb = global.HSVtoRGB(inRange , 0.4, 0.6);
 						    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
 							var border = (faceitHelper.lobbyStats.data[key].faction == 1 ) ? "left" : "right";
 							$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
