@@ -22,3 +22,6 @@ h2, h4 {
     padding: 5px;
     margin: 5px;
 }
+.sortable {
+    user-select: none;
+}
