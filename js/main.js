@@ -32,6 +32,14 @@ document.addEventListener('FH_getMapsPreference', function(e) {
     });
 });
 
+chrome.storage.sync.get({
+    blacklist_enable: false,
+    blacklist_textarea: '' 
+}, function(items) {
+    localStorage.bBlackList = items.blacklist_enable;
+    localStorage.BlackList = items.blacklist_textarea;
+});
+
 document.addEventListener('FH_copyServerIP', function(e) {
     copyToClipboard(e.detail.serverIP);
 });

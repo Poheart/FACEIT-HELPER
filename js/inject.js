@@ -30,7 +30,8 @@ var faceitHelper = {
 		premium: false,
 		matchedPlayers: false,
 		showStats: false,
-		arrayMapOrder: {}
+		arrayMapOrder: {},
+		BlackList: false
 	},
     buttons: [
 		{
@@ -160,6 +161,7 @@ var faceitHelper = {
 		var joined_players = angular.element('.queue--sm').scope().quickMatch.joined_players;
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
 		var userGetQueries = [];
+		var playerNameinQueue = [];
 		for (var i = 0; i < joined_players.length; i++) {
 			userGetQueries.push(
 				$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
@@ -172,6 +174,8 @@ var faceitHelper = {
 						type: e.payload.membership.type,
 						teamid: e.payload.active_team_id
 					};
+					// Add player name in the array for checking blacklist later
+					playerNameinQueue.push(e.payload.nickname);
 
 					var list = $('<li/>').addClass("text-left")
 						.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
@@ -189,6 +193,27 @@ var faceitHelper = {
 		}
 		$.when.apply($, userGetQueries).done(function() {
 			faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
+
+			if(faceitHelper.userSettings.BlackList) {
+				// Blacklist function
+				var blackListArray = localStorage.BlackList.split('\n');
+				var blackListedPlayerCount = 0;
+				for(var i = 0; i < playerNameinQueue.length; i++) {
+					for(var j=0;j< blackListArray.length;j++ ){
+						if(playerNameinQueue[i] == blackListArray[j]){
+							blackListedPlayerCount++;
+						}
+					}
+				}
+				if(blackListedPlayerCount == 0) {
+					faceitHelper.acceptMatch();
+					faceitHelper.sendNotification("<br><strong>No blacklisted player were found in the queue</strong><hr>Accepting the match...");
+				} else {
+					faceitHelper.sendNotification('<hr><span class="label label-danger">'+ blackListedPlayerCount + ' Blacklisted player(s) is found!</span><span class="text-danger"><strong><h3>Auto-accept disengaged</h3></strong></span>');
+					new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
+				}
+			}
+			
     	});
 	},
     createButtons: function() {
@@ -288,6 +313,8 @@ var faceitHelper = {
 		faceitHelper.userSettings.matchedPlayers = (localStorage.bMatchedPlayers == "true") ? true : false;
 		faceitHelper.userSettings.autoJoin = (localStorage.bAutoJoin == "true") ? true : false;
 		faceitHelper.userSettings.showStats = (localStorage.bShowStats == "true") ? true : false;
+		// Chrome extension option
+		faceitHelper.userSettings.BlackList = (localStorage.bBlackList == "true") ? true : false;
 		// Fetch user map preferences
 		faceitHelper.fetchMapPreference();
 	},
@@ -428,8 +455,10 @@ var faceitHelper = {
 			}
 
 			if(currentState == "CHECK_IN") {
-				if(faceitHelper.userSettings.autoAccept) {
+				if(faceitHelper.userSettings.autoAccept && !faceitHelper.userSettings.BlackList) {
 					faceitHelper.acceptMatch();
+				} else if (faceitHelper.userSettings.autoAccept && (faceitHelper.userSettings.BlackList && faceitHelper.userSettings.matchedPlayers)){
+					faceitHelper.sendNotification('<span class="text-info"><strong>Player Blacklist enabled</strong><br>Waiting for player list before accept...</span>');
 				}
 			}
 		},
