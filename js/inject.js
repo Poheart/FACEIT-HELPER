@@ -158,6 +158,7 @@ var faceitHelper = {
 		if($('#player_list').length > 0 ) {
 			return;
 		}
+		faceitHelper.globalstate.user.currentGame = angular.element('.queue--sm').scope().gameData.name;
 		var joined_players = angular.element('.queue--sm').scope().quickMatch.joined_players;
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
 		var userGetQueries = [];
@@ -165,24 +166,28 @@ var faceitHelper = {
 		for (var i = 0; i < joined_players.length; i++) {
 			userGetQueries.push(
 				$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
+					var playerElo = faceitHelper.getFaceitEloFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
+					var playerSkillLabel = faceitHelper.getFaceitSkillLabelFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
 					var fetchedValue = {
 						guid: e.payload.guid,
-						skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+e.payload.csgo_skill_level_label+'_sm.png',
+						skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+playerSkillLabel+'_sm.png',
 						country: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
 						nickname: e.payload.nickname,
-						elo: e.payload.games.csgo.faceit_elo,
+						elo: playerElo,
 						type: e.payload.membership.type,
-						teamid: e.payload.active_team_id
+						teamid: e.payload.active_team_id,
+						registered: e.payload.created_at
 					};
 					// Add player name in the array for checking blacklist later
 					playerNameinQueue.push(e.payload.nickname);
-
+					var AccountAge = Math.floor(( new Date() - new Date(fetchedValue.registered)) / 86400000);
 					var list = $('<li/>').addClass("text-left")
 						.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
 						.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "faceitHelper.imgLoadError(this, 'country')" }))
 						.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "faceitHelper.imgLoadError(this, 'skills')"}))
 						.append($('<strong/>', {id: fetchedValue.guid , text: fetchedValue.nickname}))
-						.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>');
+						.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>')
+						.append(' - ['+ AccountAge +' days ago]</li>');
 						// Temp party indicator - uses first 6 chars of team id as hex colour
 						if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
 							list.append($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + fetchedValue.teamid.substring(0,6) }));
@@ -194,7 +199,7 @@ var faceitHelper = {
 		$.when.apply($, userGetQueries).done(function() {
 			faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
 
-			if(faceitHelper.userSettings.BlackList) {
+			if(faceitHelper.userSettings.BlackList && faceitHelper.globalstate.user.currentState == "CHECK_IN") {
 				// Blacklist function
 				var blackListArray = localStorage.BlackList.split('\n');
 				var blackListedPlayerCount = 0;
@@ -397,6 +402,102 @@ var faceitHelper = {
     userInMatchRoom: function() {
 		return window.location.pathname.indexOf('/room/') != -1;
 	},
+	getFaceitEloFromGame: function(userProfile, game) {
+		var faceit_elo;
+		switch(game) {
+			case "csgo":
+				faceit_elo = userProfile.csgo.faceit_elo;
+				break;
+			case "dota2":
+				faceit_elo = userProfile.dota2.faceit_elo;
+				break;
+			case "wot_EU":
+				faceit_elo = userProfile.wot_EU.faceit_elo;
+				break;
+			case "wot_NA":
+				faceit_elo = userProfile.wot_NA.faceit_elo;
+				break;
+			case "wot_RU":
+				faceit_elo = userProfile.wot_RU.faceit_elo;
+				break;
+			case "smite":
+				faceit_elo = userProfile.smite.faceit_elo;
+				break;
+			case "smite_xbox":
+				faceit_elo = userProfile.smite_xbox.faceit_elo;
+				break;
+			case "tf2":
+				faceit_elo = userProfile.tf2.faceit_elo;
+				break;
+			case "lol_EUW":
+				faceit_elo = userProfile.lol_EUW.faceit_elo;
+				break;
+			case "lol_EUN":
+				faceit_elo = userProfile.lol_EUN.faceit_elo;
+				break;
+			case "lol_NA":
+				faceit_elo = userProfile.lol_NA.faceit_elo;
+				break;
+			case "overwatch_EU":
+				faceit_elo = userProfile.overwatch_EU.faceit_elo;
+				break;
+			case "overwatch_US":
+				faceit_elo = userProfile.overwatch_US.faceit_elo;
+				break;
+			default:
+				faceit_elo = userProfile.csgo.faceit_elo;
+		}
+		return faceit_elo;
+
+	},
+	getFaceitSkillLabelFromGame: function(userProfile, game) {
+		var skill_label;
+		switch(game) {
+			case "csgo":
+				skill_label = userProfile.csgo.skill_level_label;
+				break;
+			case "dota2":
+				skill_label = userProfile.dota2.skill_level_label;
+				break;
+			case "wot_EU":
+				skill_label = userProfile.wot_EU.skill_level_label;
+				break;
+			case "wot_NA":
+				skill_label = userProfile.wot_NA.skill_level_label;
+				break;
+			case "wot_RU":
+				skill_label = userProfile.wot_RU.skill_level_label;
+				break;
+			case "smite":
+				skill_label = userProfile.smite.skill_level_label;
+				break;
+			case "smite_xbox":
+				skill_label = userProfile.smite_xbox.skill_level_label;
+				break;
+			case "tf2":
+				skill_label = userProfile.tf2.skill_level_label;
+				break;
+			case "lol_EUN":
+				skill_label = userProfile.lol_EUN.skill_level_label;
+				break;
+			case "lol_EUW":
+				skill_label = userProfile.lol_EUW.skill_level_label;
+				break;
+			case "lol_NA":
+				skill_label = userProfile.lol_NA.skill_level_label;
+				break;
+			case "overwatch_EU":
+				skill_label = userProfile.overwatch_EU.skill_level_label;
+				break;
+			case "overwatch_US":
+				skill_label = userProfile.overwatch_US.skill_level_label;
+				break;
+			default:
+				skill_label = userProfile.csgo.skill_level_label;
+		}
+		return skill_label;
+
+	},
     debug: {
 		log: function(msg) {
 			if(faceitHelper.userSettings.debugMode) {
@@ -406,7 +507,7 @@ var faceitHelper = {
 	},
 	globalstate: {
 		match: {currentState: "", lastState: ""},
-		user: {currentState: "", lastState: "", region: ""},
+		user: {currentState: "", lastState: "", region: "", currentGame: ""},
 		set: {
 			match: function(currentState, lastState) {
 				faceitHelper.globalstate.match.currentState = currentState;
@@ -542,6 +643,9 @@ var faceitHelper = {
 
 			var roomID = faceitHelper.lobbyStats.getRoomGUID();
 			faceitHelper.debug.log("Retrived RoomID: " + roomID);
+
+			faceitHelper.globalstate.user.currentGame = window.location.pathname.split('/')[2];
+			faceitHelper.debug.log("User currentGame: " + faceitHelper.globalstate.user.currentGame);
 			// Check if we get 10 enough player data for this room
 			if(!faceitHelper.lobbyStats.isDataReady(roomID)) {
 				// fetch data and wait to be called on next update
@@ -580,20 +684,22 @@ var faceitHelper = {
 				playerStatsQueries.push(
 						$.get('https://api.faceit.com/api/users/'+playerList[i], function(userProfile) {
 							userProfile = userProfile.payload;
+
+							var playerElo = faceitHelper.getFaceitEloFromGame(userProfile.games, faceitHelper.globalstate.user.currentGame);
 							profileData.push({
 								id: userProfile.guid,
 								roomid: roomID,
 								nickname: userProfile.nickname,
 								country:  userProfile.country,
 								country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
-								elo: userProfile.games.csgo.faceit_elo
+								elo: playerElo
 							});
 						}, "json")
 					);
 
 				//Total games:
 				playerStatsQueries.push(
-					$.get('https://api.faceit.com/stats/api/v1/stats/users/'+playerList[i]+'/games/csgo', function(amountGamesData) {
+					$.get('https://api.faceit.com/stats/api/v1/stats/users/'+playerList[i]+'/games/'+faceitHelper.globalstate.user.currentGame, function(amountGamesData) {
 						if(amountGamesData.lifetime.hasOwnProperty("_id"))
 						{
 							totalGames.push({
@@ -608,7 +714,7 @@ var faceitHelper = {
 
 				//Averages of latest games
 				playerStatsQueries.push(
-					$.get("https://api-gateway.faceit.com/stats/api/v1/stats/time/users/" + playerList[i] + "/games/csgo?size=10", function(userMatchData) {
+					$.get("https://api.faceit.com/stats/api/v1/stats/time/users/" + playerList[i] + "/games/"+faceitHelper.globalstate.user.currentGame+"?size=10", function(userMatchData) {
 						//no stats recoreded
 						if(userMatchData.length == 0) {
 							return;
@@ -726,7 +832,8 @@ var faceitHelper = {
 			if(!fraction1 || !fraction2) {
 				return false;
 			}
-			if(fraction1.length + fraction2.length != 10) {
+
+			if(fraction1.length + fraction2.length != matchScope.match.team_size * 2) {
 				return false;
 			}
 
@@ -742,7 +849,11 @@ var faceitHelper = {
 		},
 		injectContent: function() {
 
-
+		if($('#fh-steam').length == 0 ) {
+			$('.page-title__actions')
+			.prepend($('<a/>', { class: "btn btn-sm btn-default", id: "fh-steam" , href: "http://steamcommunity.com/groups/faceithelper", target: "_blank"})
+			.append( $('<i/>', {class: "icon-ic-social-steam"}))
+			.append(' FACEIT HELPER GROUP'));
 
 			//show average teamElo
 			var faction1 = 0;
@@ -763,8 +874,10 @@ var faceitHelper = {
 			faction1 = Math.round(faction1/faction1Count);
 			faction2 = Math.round(faction2/faction2Count);
 
-			$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - ELO:" + faction1));
-			$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - ELO:" + faction2));
+			$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - AVERAGE ELO:" + faction1));
+			$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - AVGERAGE ELO:" + faction2));
+		}
+
 
 			var matchScope = angular.element('.match-vs').scope();
 

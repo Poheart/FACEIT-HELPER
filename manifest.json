@@ -3,12 +3,13 @@
 
     "name": "FACEIT HELPER",
     "description": "FACEIT user experience enhancement tools",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "author": "Poheart & CullenIO",
     "page_action": {
         "default_icon": {
             "19": "icons/icon19.png",
             "38": "icons/icon38.png"
+            
         },
         "default_title": "FACEIT Experience enhancement",
         "default_popup": "html/popup.html"
