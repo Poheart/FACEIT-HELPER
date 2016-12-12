@@ -875,7 +875,7 @@ var faceitHelper = {
 			faction2 = Math.round(faction2/faction2Count);
 
 			$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - AVERAGE ELO:" + faction1));
-			$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - AVGERAGE ELO:" + faction2));
+			$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - AVERAGE ELO:" + faction2));
 		}
 
 
