@@ -566,6 +566,12 @@ var faceitHelper = {
 		OnMatchStateChange: function(currentState, lastState) {
 			// This function will be called when match state changed from one to another
 			faceitHelper.debug.log("eventStage CURRENT MATCHSTATE:" + currentState+ " & LAST:" + lastState);
+			var match_type = angular.element('.match-vs').scope().match.match_type;
+			if(currentState == "captain_pick") { // FPL/CFPL
+				if(match_type == "5v5PRO" || match_type == "5v5CFPL") {
+					faceitHelper.sendNotification('Welcome.<br><strong>FPL/CFPL mode activated</strong><br><span class="label label-danger">Experimental/Test Feature</span>');
+				}
+			}
 
 			if(currentState == "voting") {
 				// Re-fetch the user voting preferences again
@@ -602,7 +608,7 @@ var faceitHelper = {
 			}
 
 			if (currentState == "ongoing") {
-				faceitHelper.sendNotification('<h2><span class="text-success"><strong>GLHF!</span></strong></h2>');
+				faceitHelper.sendNotification('<h2><span class="text-success"><strong>GL & HF!</span></strong></h2>');
 				$("#joinWarning").remove();
 			}
 
@@ -686,13 +692,15 @@ var faceitHelper = {
 							userProfile = userProfile.payload;
 
 							var playerElo = faceitHelper.getFaceitEloFromGame(userProfile.games, faceitHelper.globalstate.user.currentGame);
+							var playerSkillLabel = faceitHelper.getFaceitSkillLabelFromGame(userProfile.games, faceitHelper.globalstate.user.currentGame);
 							profileData.push({
 								id: userProfile.guid,
 								roomid: roomID,
 								nickname: userProfile.nickname,
 								country:  userProfile.country,
 								country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
-								elo: playerElo
+								elo: playerElo,
+								skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+playerSkillLabel+'_sm.png'
 							});
 						}, "json")
 					);
@@ -821,6 +829,7 @@ var faceitHelper = {
 			return matchScope.match.guid;
 		},
 		fetchPlayerlist: function() {
+			/*
 			var matchPlayers = [];
 			var matchScope = angular.element('.match-vs').scope();
 			if(!matchScope) {
@@ -844,7 +853,8 @@ var faceitHelper = {
 				matchPlayers.push(fraction2[i].guid);
 			}
 			faceitHelper.debug.log("[fetchPlayerlist] Pulled " + matchPlayers.length + " data from player list");
-			return matchPlayers;
+			return matchPlayers;*/
+			return angular.element('.match-vs').scope().match.joined_players;
 
 		},
 		injectContent: function() {
@@ -897,8 +907,7 @@ var faceitHelper = {
 							$(matchPlayers[j]).find('.match-team-member__details__name > div')
 								.append($('<br>')).append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info" }));
 
-
-
+							$(matchPlayers[j]).find('.skill-icon.ng-scope').attr("src", faceitHelper.lobbyStats.data[key].skill_level);
 							var partyid = faceitHelper.lobbyStats.data[key].party_id;
 							if(partyid == null) {
 								partyid = lobbies.length;
@@ -941,6 +950,14 @@ var faceitHelper = {
 					}
 
 				}
+				if(faceitHelper.globalstate.get.match() == "captain_pick") {
+					$(".match-vote-item__name").each(function() {
+			                if ($(this).text() == faceitHelper.lobbyStats.data[key].nickname) {
+			                    $(this).prepend($("<img>", {src: faceitHelper.lobbyStats.data[key].skill_level}));
+			                    $(this).append(document.createTextNode(" - ELO: " + faceitHelper.lobbyStats.data[key].elo));
+			                }
+			        });
+				}
 			}
 			faceitHelper.debug.log("[injectContent] Run success.");
 
@@ -956,6 +973,7 @@ var faceitHelper = {
 			this.country_flag;
 			this.party_id;
 			this.elo;
+			this.skill_level;
 			this.totalGames = 0;
 			this.avgKills = 0;
 			this.avgHsPer = 0;
@@ -971,6 +989,7 @@ var faceitHelper = {
 		        this.country = data.country;
 		        this.country_flag = data.country_flag;
 		        this.elo = data.elo;
+		        this.skill_level = data.skill_level;
 			}
 
 			this.parseTotalGames = function(data) {
