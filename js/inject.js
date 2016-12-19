@@ -159,6 +159,7 @@ var faceitHelper = {
 			return;
 		}
 		faceitHelper.globalstate.user.currentGame = angular.element('.queue--sm').scope().gameData.name;
+		var roomID = angular.element('.queue--sm').scope().quickMatch.match_id;
 		var joined_players = angular.element('.queue--sm').scope().quickMatch.joined_players;
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
 		var userGetQueries = [];
@@ -196,6 +197,8 @@ var faceitHelper = {
 				}, "json")
 			);
 		}
+
+
 		$.when.apply($, userGetQueries).done(function() {
 			faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
 
@@ -217,8 +220,18 @@ var faceitHelper = {
 					faceitHelper.sendNotification('<hr><span class="label label-danger">'+ blackListedPlayerCount + ' Blacklisted player(s) is found!</span><span class="text-danger"><strong><h3>Auto-accept disengaged</h3></strong></span>');
 					new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
 				}
+
 			}
-			
+			if(roomID) {
+				$.get('https://api.faceit.com/api/matches/' + roomID, function(data) {
+						data.payload.faction1.forEach(function(player){
+							$('#' + player.guid).parent().css("border-right", "3px solid rgb(153, 92, 92)");
+						});
+						data.payload.faction2.forEach(function(player){
+							$('#' + player.guid).parent().css("border-right", "3px solid rgb(92, 92, 153)");
+						});
+				});
+			}
     	});
 	},
     createButtons: function() {
@@ -907,7 +920,7 @@ var faceitHelper = {
 							$(matchPlayers[j]).find('.match-team-member__details__name > div')
 								.append($('<br>')).append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info" }));
 
-							$(matchPlayers[j]).find('.skill-icon.ng-scope').attr("src", faceitHelper.lobbyStats.data[key].skill_level);
+							$(matchPlayers[j]).find('.skill-icon.ng-scope').attr({src: faceitHelper.lobbyStats.data[key].skill_level , onerror: "faceitHelper.imgLoadError(this, 'skills')"});
 							var partyid = faceitHelper.lobbyStats.data[key].party_id;
 							if(partyid == null) {
 								partyid = lobbies.length;
