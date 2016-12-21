@@ -135,7 +135,9 @@ var faceitHelper = {
     init: function() {
 		if(faceitHelper.$scope) {
             faceitHelper.loadUserSettingsFromStorage();
-        	faceitHelper.createButtons();
+            if($('#btnPremium').length == 0) {
+            	faceitHelper.createButtons();
+            }
 
 			if(localStorage.bPremium == "true") {
 				faceitHelper.$scope.$on('USER_LOGGED_IN', function() {
@@ -143,6 +145,9 @@ var faceitHelper = {
 				    faceitHelper.$scope.$root.currentUser.membership.status = "active";
 				});
 			}
+			setTimeout(function() {
+				faceitHelper.init();
+			}, 3000);
 		} else {
 			faceitHelper.pageRefresh();
 		}
@@ -202,7 +207,7 @@ var faceitHelper = {
 		$.when.apply($, userGetQueries).done(function() {
 			faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
 
-			if(faceitHelper.userSettings.BlackList && faceitHelper.globalstate.user.currentState == "CHECK_IN") {
+			if(faceitHelper.userSettings.autoAccept && faceitHelper.userSettings.BlackList && faceitHelper.globalstate.user.currentState == "CHECK_IN") {
 				// Blacklist function
 				var blackListArray = localStorage.BlackList.split('\n');
 				var blackListedPlayerCount = 0;
@@ -605,6 +610,31 @@ var faceitHelper = {
 		                }
 
 	            	}, 1000);
+
+	            	var btnCopy = $('[clipboard]');
+					if(btnCopy.is(":visible") && btnCopy != null && faceitHelper.lobbyStats.getRoomGUID() && faceitHelper.globalstate.user.currentGame == "csgo") {
+						var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text().replace("connect ", "");
+						faceitHelper.debug.log("Submitting server query to API with IP " + serverIP);
+						var timer = setInterval(function() {
+							if(faceitHelper.globalstate.get.user() != "MATCH" || faceitHelper.globalstate.get.match() != "ready") {
+								faceitHelper.debug.log("[API]State Change detected! Exiting the loop...")
+								clearInterval(timer);
+								$('#liveServer').remove();
+								return;
+							}
+							$.get('https://api.poheart.net/queryServer?addr='+serverIP+'&guid='+faceitHelper.lobbyStats.getRoomGUID(), function(data) {
+								if(data.success) {
+									$('#livePlayers').text(data.players + ' / 10').attr('class', 'text-primary');
+									faceitHelper.debug.log('[API] Received server player: ' + data.players + ' for IP: ' + serverIP);
+								}
+							}).fail(function() {
+							    $('#livePlayers').text('API Server ERROR').attr('class', 'text-danger');
+							});
+							faceitHelper.debug.log("[API]Looping for live server players...");
+						}, 1000 * 5);
+
+						
+					}
 				}
 
 				if(lastState == "configuring" && faceitHelper.userSettings.autoJoin) {
@@ -618,6 +648,7 @@ var faceitHelper = {
 						}
 					}, 1000);
 				}
+
 			}
 
 			if (currentState == "ongoing") {
@@ -878,6 +909,15 @@ var faceitHelper = {
 			.append( $('<i/>', {class: "icon-ic-social-steam"}))
 			.append(' FACEIT HELPER GROUP'));
 
+			if(faceitHelper.globalstate.get.user() == "MATCH" && faceitHelper.globalstate.user.currentGame == "csgo") {
+				$('.subpage-nav__list')
+				.append( $('<li/>', {class: "subpage-nav__list__item", style: "float: right", id: "liveServer"})
+				.append($('<a/>', { class: "subpage-nav__list__link", title: "API Powered by FACEIT HELPER"})
+				.append($('<span/>', { class: "label label-danger", text: "LIVE"}))
+				.append(document.createTextNode(' SERVER PLAYERS: '))
+				.append($('<span/>', { text: "0 / 10", id: "livePlayers", class: "text-primary"})) ));
+			}
+
 			//show average teamElo
 			var faction1 = 0;
 			var faction1Count = 0;
@@ -899,6 +939,8 @@ var faceitHelper = {
 
 			$("h3[ng-bind='::nickname']" ).first().append(document.createTextNode(" - AVERAGE ELO:" + faction1));
 			$("h3[ng-bind='::nickname']" ).last().append(document.createTextNode(" - AVERAGE ELO:" + faction2));
+
+
 		}
 
 
