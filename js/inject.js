@@ -343,7 +343,12 @@ var faceitHelper = {
 	},
     joinServer: function(serverIP) {
 		setTimeout(function() {
-			var StartParameter = "steam://connect/" + serverIP;
+			var StartParameter;
+			if(faceitHelper.globalstate.user.currentGame == "csgo") {
+				StartParameter = "steam://rungame/730/76561202255233023/+connect%20" + serverIP;
+			} else {
+				StartParameter = "steam://connect/" + serverIP;
+			}
 			faceitHelper.debug.log("Triggering following address:" + StartParameter);
 			window.location = StartParameter;
 		}, 3000);
