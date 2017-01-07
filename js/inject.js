@@ -160,84 +160,149 @@ var faceitHelper = {
     	faceitHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
     appendPlayerList: function() {
-		if($('#player_list').length > 0 ) {
-			return;
+		if ($('#player_list').length > 0) {
+		    return;
 		}
 		faceitHelper.globalstate.user.currentGame = angular.element('.queue--sm').scope().gameData.name;
 		var roomID = angular.element('.queue--sm').scope().quickMatch.match_id;
 		var joined_players = angular.element('.queue--sm').scope().quickMatch.joined_players;
+		//var joined_players = [];
+		var currentState = faceitHelper.globalstate.get.user();
+		if (currentState != "WAITING" && currentState != "CHECK_IN") {
+		    return;
+		}
+		if (!joined_players) {
+		    setTimeout(function() {
+		        faceitHelper.appendPlayerList();
+		    }, 1000);
+		    return;
+		}
+
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
 		var userGetQueries = [];
 		var playerNameinQueue = [];
-		for (var i = 0; i < joined_players.length; i++) {
-			userGetQueries.push(
-				$.get('https://api.faceit.com/api/users/'+joined_players[i], function(e) {
-					var playerElo = faceitHelper.getFaceitEloFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
-					var playerSkillLabel = faceitHelper.getFaceitSkillLabelFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
-					var fetchedValue = {
-						guid: e.payload.guid,
-						skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+playerSkillLabel+'_sm.png',
-						country: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
-						nickname: e.payload.nickname,
-						elo: playerElo,
-						type: e.payload.membership.type,
-						teamid: e.payload.active_team_id,
-						registered: e.payload.created_at
-					};
-					// Add player name in the array for checking blacklist later
-					playerNameinQueue.push(e.payload.nickname);
-					var AccountAge = Math.floor(( new Date() - new Date(fetchedValue.registered)) / 86400000);
-					var list = $('<li/>').addClass("text-left")
-						.append($('<i/>', { id: fetchedValue.guid, class: "icon-ic_state_checkmark_48px icon-md" }))
-						.append($('<img/>', { class: "flag flag--16" , src: fetchedValue.country, onerror: "faceitHelper.imgLoadError(this, 'country')" }))
-						.append($('<img/>', { src: fetchedValue.skill_level ,onerror: "faceitHelper.imgLoadError(this, 'skills')"}))
-						.append($('<strong/>', {id: fetchedValue.guid , text: fetchedValue.nickname}))
-						.append(' - ELO: '+ fetchedValue.elo +' - '+ fetchedValue.type +'</li>')
-						.append(' - ['+ AccountAge +' days ago]</li>');
-						// Temp party indicator - uses first 6 chars of team id as hex colour
-						if (e.payload.active_team_id) { // This might solve the solo having party icon. Not sure bc faceit is funny
-							list.append($('<i/>', {class: "icon-ic_navigation_party_48px" , style: 'color:#' + fetchedValue.teamid.substring(0,6) }));
-						}
-					$('#player_list').append(list);
-				}, "json")
-			);
-		}
+		var fetchedValue = [];
+		joined_players = []; // Clean array
+		$.get('https://api.faceit.com/api/matches/' + roomID, function(data) {
+
+		    data.payload.faction1.forEach(function(player) {
+		        joined_players.push({
+		            guid: player.guid,
+		            faction: 1,
+		            isLeader: (player.guid === data.payload.faction1_leader ? true : false)
+		        });
+		    });
+		    data.payload.faction2.forEach(function(player) {
+		        joined_players.push({
+		            guid: player.guid,
+		            faction: 2,
+		            isLeader: (player.guid === data.payload.faction2_leader ? true : false)
+		        });
+		    });
+
+		}).done(function() {
+
+		    $.each(joined_players, function(key, value) {
+
+		        var joined_player = joined_players[key];
+		        userGetQueries.push(
+		            $.get('https://api.faceit.com/api/users/' + joined_player.guid, function(e) {
+		                var playerElo = faceitHelper.getFaceitEloFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
+		                var playerSkillLabel = faceitHelper.getFaceitSkillLabelFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
+
+		                fetchedValue.push({
+		                    guid: e.payload.guid,
+		                    skill_level: 'https://cdn.faceit.com/frontend/291/assets/images/skill-icons/skill_level_' + playerSkillLabel + '_sm.png',
+		                    country: 'https://cdn.faceit.com/frontend/291/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
+		                    nickname: e.payload.nickname,
+		                    elo: playerElo,
+		                    type: e.payload.membership.type,
+		                    teamid: e.payload.active_team_id,
+		                    registered: e.payload.created_at,
+		                    faction: joined_player.faction,
+		                    accountAge: Math.floor((new Date() - new Date(e.payload.created_at)) / 86400000),
+		                    isLeader: joined_player.isLeader
+
+		                });
+		                // Add player name in the array for checking blacklist later
+		                playerNameinQueue.push(e.payload.nickname);
+		            }, "json")
+		        );
+
+		    });
 
 
-		$.when.apply($, userGetQueries).done(function() {
-			faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
 
-			if(faceitHelper.userSettings.autoAccept && faceitHelper.userSettings.BlackList && faceitHelper.globalstate.user.currentState == "CHECK_IN") {
-				// Blacklist function
-				var blackListArray = localStorage.BlackList.split('\n');
-				var blackListedPlayerCount = 0;
-				for(var i = 0; i < playerNameinQueue.length; i++) {
-					for(var j=0;j< blackListArray.length;j++ ){
-						if(playerNameinQueue[i] == blackListArray[j]){
-							blackListedPlayerCount++;
-						}
-					}
-				}
-				if(blackListedPlayerCount == 0) {
-					faceitHelper.acceptMatch();
-					faceitHelper.sendNotification("<br><strong>No blacklisted player were found in the queue</strong><hr>Accepting the match...");
-				} else {
-					faceitHelper.sendNotification('<hr><span class="label label-danger">'+ blackListedPlayerCount + ' Blacklisted player(s) is found!</span><span class="text-danger"><strong><h3>Auto-accept disengaged</h3></strong></span>');
-					new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
-				}
+		    $.when.apply($, userGetQueries).done(function() {
 
-			}
-			if(roomID) {
-				$.get('https://api.faceit.com/api/matches/' + roomID, function(data) {
-						data.payload.faction1.forEach(function(player){
-							$('#' + player.guid).parent().css("border-right", "3px solid rgb(153, 92, 92)");
-						});
-						data.payload.faction2.forEach(function(player){
-							$('#' + player.guid).parent().css("border-right", "3px solid rgb(92, 92, 153)");
-						});
-				});
-			}
-    	});
+		        fetchedValue.sort(function(a, b) {
+		            return parseInt(a.faction) - parseInt(b.faction);
+		        });
+
+
+		        for (var i = 0; i < fetchedValue.length; i++) {
+		            var teamborderColor = fetchedValue[i].faction == 1 ? "3px solid rgb(153, 92, 92)" : "3px solid rgb(92, 92, 153)";
+		            var list = $('<li/>').addClass("text-left").css("border-right", teamborderColor)
+		                .append($('<i/>', {
+		                    id: fetchedValue[i].guid,
+		                    class: "icon-ic_state_checkmark_48px icon-md"
+		                }))
+		                .append($('<img/>', {
+		                    class: "flag flag--16",
+		                    src: fetchedValue[i].country,
+		                    onerror: "faceitHelper.imgLoadError(this, 'country')"
+		                }))
+		                .append($('<img/>', {
+		                    src: fetchedValue[i].skill_level,
+		                    onerror: "faceitHelper.imgLoadError(this, 'skills')"
+		                }))
+		                .append($('<strong/>', {
+		                    id: fetchedValue[i].guid,
+		                    text: fetchedValue[i].nickname
+		                }))
+		                .append(' - ELO: ' + fetchedValue[i].elo + ' - ' + fetchedValue[i].type + '</li>')
+		                .append(' - [' + fetchedValue[i].accountAge + ' days ago]</li>');
+		            if (fetchedValue[i].isLeader) {
+		                list.append($('<i/>', {
+		                    class: "icon-captain icon-ic_play_captain_48px"
+		                }));
+		            }
+		            if (fetchedValue[i].teamid) { // This might solve the solo having party icon. Not sure bc faceit is funny
+		                list.css("border-left", "2px solid #" + fetchedValue[i].teamid.substring(0, 6));
+		            } else {
+		            	list.css("border-left", "2px solid #2D2D2D");
+		            }
+		            $('#player_list').append(list);
+		            // Temp party indicator - uses first 6 chars of team id as hex colour
+		           
+
+		        }
+		        faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
+
+		        if (faceitHelper.userSettings.autoAccept && faceitHelper.userSettings.BlackList && faceitHelper.globalstate.user.currentState == "CHECK_IN") {
+		            // Blacklist function
+		            var blackListArray = localStorage.BlackList.split('\n');
+		            var blackListedPlayerCount = 0;
+		            for (var i = 0; i < playerNameinQueue.length; i++) {
+		                for (var j = 0; j < blackListArray.length; j++) {
+		                    if (playerNameinQueue[i] == blackListArray[j]) {
+		                        blackListedPlayerCount++;
+		                    }
+		                }
+		            }
+		            if (blackListedPlayerCount == 0) {
+		                faceitHelper.acceptMatch();
+		                faceitHelper.sendNotification("<br><strong>No blacklisted player were found in the queue</strong><hr>Accepting the match...");
+		            } else {
+		                faceitHelper.sendNotification('<hr><span class="label label-danger">' + blackListedPlayerCount + ' Blacklisted player(s) is found!</span><span class="text-danger"><strong><h3>Auto-accept disengaged</h3></strong></span>');
+		                new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
+		            }
+
+		        }
+		    });
+
+		});
+		
 	},
     createButtons: function() {
 		for (var i=0;i<faceitHelper.buttons.length;i++) {
@@ -320,10 +385,10 @@ var faceitHelper = {
     imgLoadError: function(img, type) {
 		if(type == "country") {
 			img.onerror = null;
-			img.src = "https://cdn.faceit.com/frontend/244/assets/images/flags/undefined.png";
+			img.src = "https://cdn.faceit.com/frontend/291/assets/images/flags/undefined.png";
 		} else if(type == "skills") {
 			img.onerror = null;
-			img.src = "https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_0_sm.png";
+			img.src = "https://cdn.faceit.com/frontend/291/assets/images/skill-icons/skill_level_0_sm.png";
 		}
 		return true;
 	},
@@ -747,9 +812,9 @@ var faceitHelper = {
 								roomid: roomID,
 								nickname: userProfile.nickname,
 								country:  userProfile.country,
-								country_flag: 'https://cdn.faceit.com/frontend/231/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
+								country_flag: 'https://cdn.faceit.com/frontend/291/assets/images/flags/' + userProfile.country.toUpperCase() + '.png',
 								elo: playerElo,
-								skill_level: 'https://cdn.faceit.com/frontend/231/assets/images/skill-icons/skill_level_'+playerSkillLabel+'_sm.png'
+								skill_level: 'https://cdn.faceit.com/frontend/291/assets/images/skill-icons/skill_level_'+playerSkillLabel+'_sm.png'
 							});
 						}, "json")
 					);
