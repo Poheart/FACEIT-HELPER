@@ -256,10 +256,14 @@ var faceitHelper = {
 		                    src: fetchedValue[i].skill_level,
 		                    onerror: "faceitHelper.imgLoadError(this, 'skills')"
 		                }))
-		                .append($('<strong/>', {
-		                    id: fetchedValue[i].guid,
-		                    text: fetchedValue[i].nickname
-		                }))
+						.append(
+							$('<a/>', {
+								id: fetchedValue[i].guid,
+								text: fetchedValue[i].nickname,
+								href: 'https://www.faceit.com/players/' + fetchedValue[i].nickname
+							})
+							.css("font-weight", "bold")
+						)
 		                .append(' - ELO: ' + fetchedValue[i].elo + ' - ' + fetchedValue[i].type + '</li>')
 		                .append(' - [' + fetchedValue[i].accountAge + ' days ago]</li>');
 		            if (fetchedValue[i].isLeader) {
