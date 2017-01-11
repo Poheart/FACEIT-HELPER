@@ -260,7 +260,7 @@ var faceitHelper = {
 							$('<a/>', {
 								id: fetchedValue[i].guid,
 								text: fetchedValue[i].nickname,
-								href: 'https://www.faceit.com/players/' + fetchedValue[i].nickname
+								href: 'https://www.faceit.com/' + window.location.pathname.split('/')[1] +'/players/' + fetchedValue[i].nickname
 							})
 							.css("font-weight", "bold")
 						)
