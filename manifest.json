@@ -3,7 +3,7 @@
 
     "name": "FACEIT HELPER",
     "description": "FACEIT user experience enhancement tools",
-    "version": "3.5.3",
+    "version": "3.5.5",
     "author": "Poheart & CullenIO",
     "page_action": {
         "default_icon": {
@@ -36,6 +36,7 @@
         "webRequest",
         "webRequestBlocking",
         "activeTab",
+        "tabs",
         "storage",
         "clipboardWrite"
     ]
