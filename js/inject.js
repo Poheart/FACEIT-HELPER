@@ -536,6 +536,9 @@ var faceitHelper = {
 			case "overwatch_US":
 				faceit_elo = userProfile.overwatch_US.faceit_elo;
 				break;
+			case "csco":
+				faceit_elo = userProfile.csco.faceit_elo;
+				break;
 			default:
 				faceit_elo = userProfile.csgo.faceit_elo;
 		}
@@ -583,6 +586,9 @@ var faceitHelper = {
 				break;
 			case "overwatch_US":
 				skill_label = userProfile.overwatch_US.skill_level_label;
+				break;
+			case "csco":
+				skill_label = userProfile.csco.skill_level_label;
 				break;
 			default:
 				skill_label = userProfile.csgo.skill_level_label;
