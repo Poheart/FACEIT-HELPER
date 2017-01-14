@@ -413,7 +413,7 @@ var faceitHelper = {
     joinServer: function(serverIP) {
 		setTimeout(function() {
 			var StartParameter;
-			if(faceitHelper.globalstate.user.currentGame == "csgo") {
+			if(faceitHelper.globalstate.user.currentGame == "csgo" || faceitHelper.globalstate.user.currentGame == "csco" ) {
 				StartParameter = "steam://rungame/730/76561202255233023/+connect%20" + serverIP;
 			} else {
 				StartParameter = "steam://connect/" + serverIP;
@@ -692,7 +692,7 @@ var faceitHelper = {
 	            	}, 1000);
 
 	            	var btnCopy = $('[clipboard]');
-					if(btnCopy.is(":visible") && btnCopy != null && faceitHelper.lobbyStats.getRoomGUID() && faceitHelper.globalstate.user.currentGame == "csgo") {
+					if(btnCopy.is(":visible") && btnCopy != null && faceitHelper.lobbyStats.getRoomGUID() && (faceitHelper.globalstate.user.currentGame == "csgo" || faceitHelper.globalstate.user.currentGame == "csco")) {
 						var serverIP = $('[ng-if="serverConnectData.active"] span[select-text]').text().replace("connect ", "");
 						faceitHelper.debug.log("Submitting server query to API with IP " + serverIP);
 						var timer = setInterval(function() {
@@ -989,7 +989,7 @@ var faceitHelper = {
 			.append( $('<i/>', {class: "icon-ic-social-steam"}))
 			.append(' FACEIT HELPER GROUP'));
 
-			if(faceitHelper.globalstate.get.user() == "MATCH" && faceitHelper.globalstate.user.currentGame == "csgo") {
+			if(faceitHelper.globalstate.get.user() == "MATCH" && (faceitHelper.globalstate.user.currentGame == "csgo" || faceitHelper.globalstate.user.currentGame == "csco")) {
 				$('.subpage-nav__list')
 				.append( $('<li/>', {class: "subpage-nav__list__item", style: "float: right", id: "liveServer"})
 				.append($('<a/>', { class: "subpage-nav__list__link", title: "API Powered by FACEIT HELPER"})
