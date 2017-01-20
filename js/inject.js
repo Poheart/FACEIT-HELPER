@@ -940,7 +940,7 @@ var faceitHelper = {
 
 		},
 		isInjected: function() {
-			var injectCount = $('.helper-stats');
+			var injectCount = $('.helper-playerelo');
 			return injectCount.length > 0;
 		},
 		isDataReady: function(roomID) {
@@ -1043,14 +1043,14 @@ var faceitHelper = {
 			for(var key in faceitHelper.lobbyStats.data){ // Data length
 				for (var j = 0; j < matchPlayers.length; j++) { // DOM Content team member length
 					var name = $(matchPlayers[j]).find('strong[ng-bind="::teamMember.nickname"]').text();
-					var state = $(matchPlayers[j]).find("span").hasClass("helper-stats");
+					var state = $(matchPlayers[j]).find("span").hasClass("helper-playerelo");
 					if(name == faceitHelper.lobbyStats.data[key].nickname && !state) {
 						// Our targered users for this loop
 							var flag_style = $(matchPlayers[j]).find('.match-team-member__details').hasClass('match-team-member__details--right') ? "left:initial;right:0;" : "right:initial;left:0;";
 							$(matchPlayers[j]).find('.match-team-member__details__skill')
 								.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+faceitHelper.lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: faceitHelper.lobbyStats.data[key].country_flag, class: "flag flag--16 skill-icon", onerror: "faceitHelper.imgLoadError(this, 'country')" })));
 							$(matchPlayers[j]).find('.match-team-member__details__name > div')
-								.append($('<br>')).append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info" }));
+								.append($('<br>')).append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info helper-playerelo" }));
 
 							$(matchPlayers[j]).find('.skill-icon.ng-scope').attr({src: faceitHelper.lobbyStats.data[key].skill_level , onerror: "faceitHelper.imgLoadError(this, 'skills')"});
 							var partyid = faceitHelper.lobbyStats.data[key].party_id;
