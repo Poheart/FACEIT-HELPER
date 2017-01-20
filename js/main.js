@@ -19,9 +19,8 @@ var injectScript = function(script) {
 */
 
 $(document).ready(function() {
-	var manifest = chrome.runtime.getManifest();
     injectScript('js/inject.js');
-     $('[ng-if="version"] small').attr("id", "helperDebug").append('<br>HELPER v <strong>' + manifest.version + '</strong>');
+     $('[ng-if="version"] small').attr("id", "helperDebug").append(',HELPER v <strong>' + chrome.runtime.getManifest().version + '</strong>');
 });
 
 document.addEventListener('FH_getMapsPreference', function(e) {
