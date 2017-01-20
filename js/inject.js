@@ -179,6 +179,16 @@ var faceitHelper = {
 		}
 
 		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
+		
+		$('#player_list').append($('<li/>', {
+		    class: "player_list-loading"
+		}).append($('<h2/>', {
+		    style: "line-height: 200%",
+		    text: " Fetching players data, please wait..."
+		}).prepend($('<img>', {
+		    src: "https://faceit.poheart.net/images/loading.gif",
+		    style: "vertical-align: text-bottom"
+		}))));
 		var userGetQueries = [];
 		var playerNameinQueue = [];
 		var fetchedValue = [];
@@ -199,7 +209,6 @@ var faceitHelper = {
 		            isLeader: (player.guid === data.payload.faction2_leader ? true : false)
 		        });
 		    });
-
 		}).done(function() {
 
 		    $.each(joined_players, function(key, value) {
@@ -240,6 +249,7 @@ var faceitHelper = {
 		        });
 
 
+		        $('.player_list-loading').remove();
 		        for (var i = 0; i < fetchedValue.length; i++) {
 		            var teamborderColor = fetchedValue[i].faction == 1 ? "3px solid rgb(153, 92, 92)" : "3px solid rgb(92, 92, 153)";
 		            var list = $('<li/>').addClass("text-left").css("border-right", teamborderColor)
@@ -633,7 +643,7 @@ var faceitHelper = {
 				if(faceitHelper.userSettings.matchedPlayers) {
 					setTimeout(function() {
 						faceitHelper.appendPlayerList();
-					}, 1500);
+					}, 500);
 				}
 			}
 
