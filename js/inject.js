@@ -1166,8 +1166,9 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	if(!e.detail.arrayMapOrder) {
 		// Give some default setting
 		faceitHelper.userSettings.arrayMapOrder= "de_dust2>de_cache>de_mirage>de_nuke>de_cbble>de_inferno>de_train>de_overpass>";
+	} else {
+		faceitHelper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 	}
-	faceitHelper.userSettings.arrayMapOrder = e.detail.arrayMapOrder.split(">");
 });
 
 angular.element(document).ready(function () {
