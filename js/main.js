@@ -20,7 +20,7 @@ var injectScript = function(script) {
 
 $(document).ready(function() {
     injectScript('js/inject.js');
-     $('[ng-if="version"] small').attr("id", "helperDebug").append(',HELPER v <strong>' + chrome.runtime.getManifest().version + '</strong>');
+     $('[ng-if="version"] small').attr("class", "helperDebug").append(',HELPER v <strong>' + chrome.runtime.getManifest().version + '</strong>');
 });
 
 document.addEventListener('FH_getMapsPreference', function(e) {

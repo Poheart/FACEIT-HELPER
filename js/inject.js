@@ -33,6 +33,7 @@ var faceitHelper = {
 		arrayMapOrder: {},
 		BlackList: false
 	},
+	session: "",
     buttons: [
 		{
 			id: "btnPremium",
@@ -160,7 +161,7 @@ var faceitHelper = {
     	faceitHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
     appendPlayerList: function() {
-		if ($('.player_list').length > 0) {
+		if ($('.' + faceitHelper.session).length > 0) {
 		    return;
 		}
 		faceitHelper.globalstate.user.currentGame = angular.element('.queue--sm').scope().gameData.name;
@@ -178,10 +179,10 @@ var faceitHelper = {
 		    return;
 		}
 
-		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul class="list-unstyled player_list"></ul>');
+		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul class="list-unstyled ' + faceitHelper.session + '"></ul>');
 		
-		$('.player_list').append($('<li/>', {
-		    class: "player_list-loading"
+		$('.' + faceitHelper.session).append($('<li/>', {
+		    class: faceitHelper.session + "-loading"
 		}).append($('<h2/>', {
 		    style: "line-height: 200%",
 		    text: " Fetching players data, please wait..."
@@ -249,7 +250,7 @@ var faceitHelper = {
 		        });
 
 
-		        $('.player_list-loading').remove();
+		        $('.' + faceitHelper.session +'-loading').remove();
 		        for (var i = 0; i < fetchedValue.length; i++) {
 		            var teamborderColor = fetchedValue[i].faction == 1 ? "3px solid rgb(153, 92, 92)" : "3px solid rgb(92, 92, 153)";
 		            var list = $('<li/>').addClass("text-left").css("border-right", teamborderColor)
@@ -286,7 +287,7 @@ var faceitHelper = {
 		            } else {
 		            	list.css("border-left", "2px solid #2D2D2D");
 		            }
-		            $('.player_list').append(list);
+		            $('.' + faceitHelper.session).append(list);
 		            // Temp party indicator - uses first 6 chars of team id as hex colour
 		           
 
@@ -336,6 +337,7 @@ var faceitHelper = {
 			faceitHelper.userSettings.debugMode = !faceitHelper.userSettings.debugMode;
 			var Status = faceitHelper.userSettings.debugMode ? 'enabled' : 'disabled';
 			faceitHelper.sendNotification("Debuging mode " + Status + "!");
+			faceitHelper.debug.log("FACEIT HELPER session hash: " + faceitHelper.session);
 		});
 		setTimeout(function() { faceitHelper.updateButtons(); }, 500);
 	},
@@ -461,7 +463,7 @@ var faceitHelper = {
 				clearInterval(timer);
 				return;
 			}
-			if($('.player_list').length <= 0 ) {
+			if($('.' + faceitHelper.session).length <= 0 ) {
 				return;
 			}
 			// Do player-checkin checks here!
@@ -1185,6 +1187,8 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 angular.element(document).ready(function () {
 	faceitHelper.init();
 
+	faceitHelper.session = Math.random().toString(36).slice(2);
+
 
 	// Watch for user stage change
 	faceitHelper.$scope.$watch(
@@ -1198,7 +1202,6 @@ angular.element(document).ready(function () {
 			faceitHelper.dispatchStateChange(newValue, oldValue, "user");
 		}
 	);
-
 	// Watch for match state change
 	faceitHelper.$scope.$watch(
 		function () {
