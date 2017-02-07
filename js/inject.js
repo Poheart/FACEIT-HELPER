@@ -160,7 +160,7 @@ var faceitHelper = {
     	faceitHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
     appendPlayerList: function() {
-		if ($('#player_list').length > 0) {
+		if ($('.player_list').length > 0) {
 		    return;
 		}
 		faceitHelper.globalstate.user.currentGame = angular.element('.queue--sm').scope().gameData.name;
@@ -178,9 +178,9 @@ var faceitHelper = {
 		    return;
 		}
 
-		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul id="player_list" class="list-unstyled"></ul>');
+		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul class="list-unstyled player_list"></ul>');
 		
-		$('#player_list').append($('<li/>', {
+		$('.player_list').append($('<li/>', {
 		    class: "player_list-loading"
 		}).append($('<h2/>', {
 		    style: "line-height: 200%",
@@ -286,7 +286,7 @@ var faceitHelper = {
 		            } else {
 		            	list.css("border-left", "2px solid #2D2D2D");
 		            }
-		            $('#player_list').append(list);
+		            $('.player_list').append(list);
 		            // Temp party indicator - uses first 6 chars of team id as hex colour
 		           
 
@@ -379,9 +379,11 @@ var faceitHelper = {
 			case "members_elementupdate":
 				faceitHelper.eventStage.OnTeamMemberElementUpdate();
 				break;
+			case "url":
+				faceitHelper.eventStage.OnUserRouteChange(currentState, lastState);
+				break;
 			default:
 				console.error("Unknown mode type caught on dispatchStateChange");
-				break;
 		}
 
 	},
@@ -459,7 +461,7 @@ var faceitHelper = {
 				clearInterval(timer);
 				return;
 			}
-			if($('#player_list').length <= 0 ) {
+			if($('.player_list').length <= 0 ) {
 				return;
 			}
 			// Do player-checkin checks here!
@@ -792,9 +794,18 @@ var faceitHelper = {
 				faceitHelper.lobbyStats.fetchData();
 				return;
 			}
-
 			// Begin the injection of script
 			faceitHelper.lobbyStats.injectContent();
+		},
+		OnUserRouteChange: function(newRoute, oldRoute) {
+
+			faceitHelper.debug.log("User route changed to: " + newRoute + " from " + oldRoute);
+			if(window.location.pathname.indexOf('/players/') == -1) {
+				return;
+			}
+			$('div.page-title__edit-button.ng-scope > input').remove();
+			$('div.page-title__edit-button.ng-scope').attr('onclick', 'faceitHelper.sendNotification("Please disable this extension temporary before changing profile image");');
+
 		}
 	},
     lobbyStats: {
@@ -1212,6 +1223,18 @@ angular.element(document).ready(function () {
 		function(newValue, oldValue) {
 			setTimeout(function() {
 				faceitHelper.dispatchStateChange(newValue, oldValue, "match_actionUpdate");
+			}, 2000);
+		}
+	);
+
+	// Watch for route change
+	faceitHelper.$scope.$watch(
+		function () {
+			return window.location.pathname;
+		},
+		function(newValue, oldValue) {
+			setTimeout(function() {
+				faceitHelper.dispatchStateChange(newValue, oldValue, "url");
 			}, 2000);
 		}
 	);
