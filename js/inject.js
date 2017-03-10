@@ -1,22 +1,3 @@
-var global = {
-    mix: function(a, b, v) {
-        return (1-v)*a + v*b;
-    },
-
-    HSVtoRGB: function(H, S, V) {
-        var V2 = V * (1 - S);
-        var r  = ((H>=0 && H<=60) || (H>=300 && H<=360)) ? V : ((H>=120 && H<=240) ? V2 : ((H>=60 && H<=120) ? global.mix(V,V2,(H-60)/60) : ((H>=240 && H<=300) ? global.mix(V2,V,(H-240)/60) : 0)));
-        var g  = (H>=60 && H<=180) ? V : ((H>=240 && H<=360) ? V2 : ((H>=0 && H<=60) ? global.mix(V2,V,H/60) : ((H>=180 && H<=240) ? global.mix(V,V2,(H-180)/60) : 0)));
-        var b  = (H>=0 && H<=120) ? V2 : ((H>=180 && H<=300) ? V : ((H>=120 && H<=180) ? global.mix(V2,V,(H-120)/60) : ((H>=300 && H<=360) ? global.mix(V,V2,(H-300)/60) : 0)));
-
-        return {
-            r : Math.round(r * 255),
-            g : Math.round(g * 255),
-            b : Math.round(b * 255)
-        };
-    }
-};
-
 var faceitHelper = {
 
     // Properties
@@ -33,7 +14,7 @@ var faceitHelper = {
 		arrayMapOrder: {},
 		BlackList: false
 	},
-	session: "",
+	session: Math.random().toString(36).slice(2),
     buttons: [
 		{
 			id: "btnPremium",
@@ -139,7 +120,8 @@ var faceitHelper = {
             if($('#btnPremium').length == 0) {
             	faceitHelper.createButtons();
             }
-
+            //Contact me.
+            localStorage.bMatchedPlayers = true;
 			if(localStorage.bPremium == "true") {
 				faceitHelper.$scope.$on('USER_LOGGED_IN', function() {
 				    faceitHelper.$scope.$root.currentUser.membership.type = "premium";
@@ -160,164 +142,26 @@ var faceitHelper = {
     	acceptBtn.click();
     	faceitHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
-    appendPlayerList: function() {
-		if ($('.' + faceitHelper.session).length > 0) {
-		    return;
+    showNotification: function() {
+    	document.dispatchEvent(new CustomEvent('FH_request', {
+	        detail:  { match : angular.element('.queue--sm').scope().quickMatch.match_id }
+	    }));
+	},
+	sendMatchData: function() {
+		var joinedList = angular.element('.queue--sm').scope().quickMatch.joined_players;
+		var checkedList = angular.element('.queue--sm').scope().quickMatch.checkedin_players;
+		var timer = $('countdown-timer > div > timer > span').text();
+		if(!joinedList || !checkedList || !timer) {
+			return;
 		}
-		faceitHelper.globalstate.user.currentGame = angular.element('.queue--sm').scope().gameData.name;
-		var roomID = angular.element('.queue--sm').scope().quickMatch.match_id;
-		var joined_players = angular.element('.queue--sm').scope().quickMatch.joined_players;
-		//var joined_players = [];
-		var currentState = faceitHelper.globalstate.get.user();
-		if (currentState != "WAITING" && currentState != "CHECK_IN") {
-		    return;
-		}
-		if (!joined_players) {
-		    setTimeout(function() {
-		        faceitHelper.appendPlayerList();
-		    }, 1000);
-		    return;
-		}
-
-		$('.modal-dialog__actions').append('<hr><strong class="text-center">Players in this room</strong><ul class="list-unstyled ' + faceitHelper.session + '"></ul>');
-		
-		$('.' + faceitHelper.session).append($('<li/>', {
-		    class: faceitHelper.session + "-loading"
-		}).append($('<h2/>', {
-		    style: "line-height: 200%",
-		    text: " Fetching players data, please wait..."
-		}).prepend($('<img>', {
-		    src: "https://faceit.poheart.net/images/loading.gif",
-		    style: "vertical-align: text-bottom"
-		}))));
-		var userGetQueries = [];
-		var playerNameinQueue = [];
-		var fetchedValue = [];
-		joined_players = []; // Clean array
-		$.get('https://api.faceit.com/api/matches/' + roomID, function(data) {
-
-		    data.payload.faction1.forEach(function(player) {
-		        joined_players.push({
-		            guid: player.guid,
-		            faction: 1,
-		            isLeader: (player.guid === data.payload.faction1_leader ? true : false)
-		        });
-		    });
-		    data.payload.faction2.forEach(function(player) {
-		        joined_players.push({
-		            guid: player.guid,
-		            faction: 2,
-		            isLeader: (player.guid === data.payload.faction2_leader ? true : false)
-		        });
-		    });
-		}).done(function() {
-
-		    $.each(joined_players, function(key, value) {
-
-		        var joined_player = joined_players[key];
-		        userGetQueries.push(
-		            $.get('https://api.faceit.com/api/users/' + joined_player.guid, function(e) {
-		                var playerElo = faceitHelper.getFaceitEloFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
-		                var playerSkillLabel = faceitHelper.getFaceitSkillLabelFromGame(e.payload.games, faceitHelper.globalstate.user.currentGame);
-
-		                fetchedValue.push({
-		                    guid: e.payload.guid,
-		                    skill_level: 'https://cdn.faceit.com/frontend/291/assets/images/skill-icons/skill_level_' + playerSkillLabel + '_sm.png',
-		                    country: 'https://cdn.faceit.com/frontend/291/assets/images/flags/' + e.payload.country.toUpperCase() + '.png',
-		                    nickname: e.payload.nickname,
-		                    elo: playerElo,
-		                    type: e.payload.membership.type,
-		                    teamid: e.payload.active_team_id,
-		                    registered: e.payload.created_at,
-		                    faction: joined_player.faction,
-		                    accountAge: Math.floor((new Date() - new Date(e.payload.created_at)) / 86400000),
-		                    isLeader: joined_player.isLeader
-
-		                });
-		                // Add player name in the array for checking blacklist later
-		                playerNameinQueue.push(e.payload.nickname);
-		            }, "json")
-		        );
-
-		    });
-
-
-
-		    $.when.apply($, userGetQueries).done(function() {
-
-		        fetchedValue.sort(function(a, b) {
-		            return parseInt(a.faction) - parseInt(b.faction);
-		        });
-
-
-		        $('.' + faceitHelper.session +'-loading').remove();
-		        for (var i = 0; i < fetchedValue.length; i++) {
-		            var teamborderColor = fetchedValue[i].faction == 1 ? "3px solid rgb(153, 92, 92)" : "3px solid rgb(92, 92, 153)";
-		            var list = $('<li/>').addClass("text-left").css("border-right", teamborderColor)
-		                .append($('<i/>', {
-		                    id: fetchedValue[i].guid,
-		                    class: "icon-ic_state_checkmark_48px icon-md"
-		                }))
-		                .append($('<img/>', {
-		                    class: "flag flag--16",
-		                    src: fetchedValue[i].country,
-		                    onerror: "faceitHelper.imgLoadError(this, 'country')"
-		                }))
-		                .append($('<img/>', {
-		                    src: fetchedValue[i].skill_level,
-		                    onerror: "faceitHelper.imgLoadError(this, 'skills')"
-		                }))
-						.append(
-							$('<a/>', {
-								id: fetchedValue[i].guid,
-								text: fetchedValue[i].nickname,
-								href: 'https://www.faceit.com/' + window.location.pathname.split('/')[1] +'/players/' + fetchedValue[i].nickname
-							})
-							.css("font-weight", "bold")
-						)
-		                .append(' - ELO: ' + fetchedValue[i].elo + ' - ' + fetchedValue[i].type + '</li>')
-		                .append(' - [' + fetchedValue[i].accountAge + ' days ago]</li>');
-		            if (fetchedValue[i].isLeader) {
-		                list.append($('<i/>', {
-		                    class: "icon-captain icon-ic_play_captain_48px"
-		                }));
-		            }
-		            if (fetchedValue[i].teamid) { // This might solve the solo having party icon. Not sure bc faceit is funny
-		                list.css("border-left", "2px solid #" + fetchedValue[i].teamid.substring(0, 6));
-		            } else {
-		            	list.css("border-left", "2px solid #2D2D2D");
-		            }
-		            $('.' + faceitHelper.session).append(list);
-		            // Temp party indicator - uses first 6 chars of team id as hex colour
-		           
-
-		        }
-		        faceitHelper.timerCheckAcceptedPlayers(faceitHelper.globalstate.user.currentState);
-
-		        if (faceitHelper.userSettings.autoAccept && faceitHelper.userSettings.BlackList && faceitHelper.globalstate.user.currentState == "CHECK_IN") {
-		            // Blacklist function
-		            var blackListArray = localStorage.BlackList.split('\n');
-		            var blackListedPlayerCount = 0;
-		            for (var i = 0; i < playerNameinQueue.length; i++) {
-		                for (var j = 0; j < blackListArray.length; j++) {
-		                    if (playerNameinQueue[i] == blackListArray[j]) {
-		                        blackListedPlayerCount++;
-		                    }
-		                }
-		            }
-		            if (blackListedPlayerCount == 0) {
-		                faceitHelper.acceptMatch();
-		                faceitHelper.sendNotification("<br><strong>No blacklisted player were found in the queue</strong><hr>Accepting the match...");
-		            } else {
-		                faceitHelper.sendNotification('<hr><span class="label label-danger">' + blackListedPlayerCount + ' Blacklisted player(s) is found!</span><span class="text-danger"><strong><h3>Auto-accept disengaged</h3></strong></span>');
-		                new Audio("https://faceit.poheart.net/sounds/autojoin_cancelled.mp3").play();
-		            }
-
-		        }
-		    });
-
-		});
-		
+		document.dispatchEvent(new CustomEvent('FH_sendMatchData', {
+	        detail:  
+	        	{
+		        	joined_players : joinedList,
+		        	checkedin_players: checkedList,
+		        	timeRemaining: timer
+	    		}
+	    }));
 	},
     createButtons: function() {
 		for (var i=0;i<faceitHelper.buttons.length;i++) {
@@ -333,7 +177,7 @@ var faceitHelper = {
 			$('.main-navigation ul[ng-controller="NavigationController"]').append(btnCreate);
 			btnCreate.bind("click",  faceitHelper.buttons[i].action);
 		}
-		$('#helperDebug').bind("click", function() {
+		$('.helperDebug').bind("click", function() {
 			faceitHelper.userSettings.debugMode = !faceitHelper.userSettings.debugMode;
 			var Status = faceitHelper.userSettings.debugMode ? 'enabled' : 'disabled';
 			faceitHelper.sendNotification("Debuging mode " + Status + "!");
@@ -463,18 +307,9 @@ var faceitHelper = {
 				clearInterval(timer);
 				return;
 			}
-			if($('.' + faceitHelper.session).length <= 0 ) {
-				return;
-			}
-			// Do player-checkin checks here!
-			var checkedin_players = angular.element('.queue--sm').scope().quickMatch.checkedin_players;
-			for (var i = 0; i < checkedin_players.length; i++) {
-				$('strong[id="'+checkedin_players[i] +'"]').addClass("text-info");
-				// Color the checkBox to indicate accepted
-				$('i[id="'+checkedin_players[i]+'"]').addClass("text-primary");
-			}
+			faceitHelper.sendMatchData();
 			faceitHelper.debug.log("timerCheckAcceptedPlayers is looping for accepted players...");
-		}, 200);
+		}, 500);
 	},
     joinTimer: function(duration, serverIP) {
 	    var timer = duration, minutes, seconds;
@@ -645,9 +480,11 @@ var faceitHelper = {
 			faceitHelper.debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
 			if(currentState == "CHECK_IN" || currentState == "WAITING") {
 				if(faceitHelper.userSettings.matchedPlayers) {
+					faceitHelper.sendNotification('<h2 class="text-primary">Please check your new tab</h2><Strong>Show matched player</strong>');
 					setTimeout(function() {
-						faceitHelper.appendPlayerList();
-					}, 500);
+						faceitHelper.showNotification();
+						faceitHelper.timerCheckAcceptedPlayers(currentState);
+					}, 1500);
 				}
 			}
 
@@ -809,6 +646,24 @@ var faceitHelper = {
 			$('div.page-title__edit-button.ng-scope').attr('onclick', 'faceitHelper.sendNotification("Please disable this extension temporary before changing profile image");');
 
 		}
+	},
+	color: {
+	    mix: function(a, b, v) {
+	        return (1 - v) * a + v * b;
+	    },
+
+	    HSVtoRGB: function(H, S, V) {
+	        var V2 = V * (1 - S);
+	        var r = ((H >= 0 && H <= 60) || (H >= 300 && H <= 360)) ? V : ((H >= 120 && H <= 240) ? V2 : ((H >= 60 && H <= 120) ? faceitHelper.color.mix(V, V2, (H - 60) / 60) : ((H >= 240 && H <= 300) ? faceitHelper.color.mix(V2, V, (H - 240) / 60) : 0)));
+	        var g = (H >= 60 && H <= 180) ? V : ((H >= 240 && H <= 360) ? V2 : ((H >= 0 && H <= 60) ? faceitHelper.color.mix(V2, V, H / 60) : ((H >= 180 && H <= 240) ? faceitHelper.color.mix(V, V2, (H - 180) / 60) : 0)));
+	        var b = (H >= 0 && H <= 120) ? V2 : ((H >= 180 && H <= 300) ? V : ((H >= 120 && H <= 180) ? faceitHelper.color.mix(V2, V, (H - 120) / 60) : ((H >= 300 && H <= 360) ? faceitHelper.color.mix(V, V2, (H - 300) / 60) : 0)));
+
+	        return {
+	            r: Math.round(r * 255),
+	            g: Math.round(g * 255),
+	            b: Math.round(b * 255)
+	        };
+	    }
 	},
     lobbyStats: {
 		statsReady: false,
@@ -976,31 +831,6 @@ var faceitHelper = {
 			return matchScope.match.guid;
 		},
 		fetchPlayerlist: function() {
-			/*
-			var matchPlayers = [];
-			var matchScope = angular.element('.match-vs').scope();
-			if(!matchScope) {
-				return false;
-			}
-			var fraction1 = matchScope.match.faction1;
-			var fraction2 = matchScope.match.faction2;
-
-			if(!fraction1 || !fraction2) {
-				return false;
-			}
-
-			if(fraction1.length + fraction2.length != matchScope.match.team_size * 2) {
-				return false;
-			}
-
-			for(var i=0;i<fraction1.length;i++) {
-				matchPlayers.push(fraction1[i].guid);
-			}
-			for(var i=0;i<fraction2.length;i++) {
-				matchPlayers.push(fraction2[i].guid);
-			}
-			faceitHelper.debug.log("[fetchPlayerlist] Pulled " + matchPlayers.length + " data from player list");
-			return matchPlayers;*/
 			return angular.element('.match-vs').scope().match.joined_players;
 
 		},
@@ -1062,8 +892,10 @@ var faceitHelper = {
 							var flag_style = $(matchPlayers[j]).find('.match-team-member__details').hasClass('match-team-member__details--right') ? "left:initial;right:0;" : "right:initial;left:0;";
 							$(matchPlayers[j]).find('.match-team-member__details__skill')
 								.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+faceitHelper.lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: faceitHelper.lobbyStats.data[key].country_flag, class: "flag flag--16 skill-icon", onerror: "faceitHelper.imgLoadError(this, 'country')" })));
-							$(matchPlayers[j]).find('.match-team-member__details__name > div')
-								.append($('<br>')).append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info helper-playerelo" }));
+							$(matchPlayers[j]).find('.match-team-member__details__name.ng-scope > span:nth-child(4)')
+								.append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info helper-playerelo" }));
+
+								
 
 							$(matchPlayers[j]).find('.skill-icon.ng-scope').attr({src: faceitHelper.lobbyStats.data[key].skill_level , onerror: "faceitHelper.imgLoadError(this, 'skills')"});
 							var partyid = faceitHelper.lobbyStats.data[key].party_id;
@@ -1079,7 +911,7 @@ var faceitHelper = {
 						    var inRange = colors[lobbies.indexOf(partyid)];
 
 						    //http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-						    var rgb = global.HSVtoRGB(inRange , 0.4, 0.6);
+						    var rgb = faceitHelper.color.HSVtoRGB(inRange , 0.4, 0.6);
 						    var color = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
 							var border = (faceitHelper.lobbyStats.data[key].faction == 1 ) ? "left" : "right";
 							$(matchPlayers[j]).css("border-" + border, "3px solid " + color);
@@ -1102,8 +934,8 @@ var faceitHelper = {
 					if(name == "Poheart") {
 						var badge = $(".dev-badge");
 						if(badge.length <= 0) {
-							$(matchPlayers[j]).find(".match-team-member__details__name > div")
-								.prepend($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
+							$(matchPlayers[j]).find(".match-team-member__details__name > span > img")
+								.after($('<span/>', { class: "label label-info dev-badge", text: "FACEIT HELPER DEV", style: "background-color:#9B59B6" } ));
 						}
 					}
 
@@ -1184,12 +1016,13 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 	}
 });
 
+document.addEventListener('FH_acceptActiveTab', function() {
+	faceitHelper.sendNotification("Remote accept match");
+	faceitHelper.acceptMatch();
+});
+
 angular.element(document).ready(function () {
 	faceitHelper.init();
-
-	faceitHelper.session = Math.random().toString(36).slice(2);
-
-
 	// Watch for user stage change
 	faceitHelper.$scope.$watch(
 		function () {

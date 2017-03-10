@@ -19,8 +19,15 @@ var injectScript = function(script) {
 */
 
 $(document).ready(function() {
-    injectScript('js/inject.js');
-     $('[ng-if="version"] small').attr("class", "helperDebug").append(',HELPER v <strong>' + chrome.runtime.getManifest().version + '</strong>');
+    var url = window.location.host;
+    if(url === 'www.faceit.com') {
+        injectScript('js/inject.js');
+        $('[ng-if="version"] small').attr("class", "helperDebug").append(',HELPER v <strong>' + chrome.runtime.getManifest().version + '</strong>');
+    } else if(url === 'www.poheart.net') {
+        injectScript('js/webmodule.js')
+
+        $('.helper-version').text(chrome.runtime.getManifest().version);
+    }
 });
 
 document.addEventListener('FH_getMapsPreference', function(e) {
@@ -42,6 +49,37 @@ chrome.storage.sync.get({
 document.addEventListener('FH_copyServerIP', function(e) {
     copyToClipboard(e.detail.serverIP);
 });
+
+document.addEventListener('FH_acceptMatch', function() {
+    chrome.runtime.sendMessage(
+        {method:"accept-match"}
+    );
+});
+
+
+document.addEventListener('FH_closeWindow', function() {
+    chrome.runtime.sendMessage(
+        {method:"closeWindow"}
+    );
+});
+document.addEventListener('FH_request', function(e) {
+    chrome.runtime.sendMessage(
+        {method: "openpage", detail: e.detail.match}
+    );
+});
+document.addEventListener('FH_sendMatchData', function(e) {
+    chrome.runtime.sendMessage(
+        {
+            method: "sendMatchData", 
+            detail: { 
+                joinedplayers: e.detail.joined_players, 
+                checkedinplayers: e.detail.checkedin_players,
+                timeRemaining: e.detail.timeRemaining 
+            }
+        }
+    );
+});
+
 
 var copyToClipboard = function( text ){
     var copyDiv = document.createElement('div');
