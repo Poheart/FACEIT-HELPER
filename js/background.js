@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(
                 if (results.length == 0) {
                     chrome.tabs.create({url: 'https://www.poheart.net/room/' + request.detail});
                 } else {
-                    chrome.tabs.update(results[0].id, {url: 'https://www.poheart.net/room/' + request.detail, active: true});
+                    chrome.tabs.update(results[0].id, {url: 'https://www.poheart.net/room/' + request.detail, active: false});
                 }
             });
         } else if(request.method == "sendMatchData") {
@@ -29,9 +29,13 @@ chrome.runtime.onMessage.addListener(
                 if (tabs.length > 0) {
                      chrome.tabs.executeScript(tabs[0].id,{
                         // Should implement this in better way
-                        code: "document.dispatchEvent(new CustomEvent('FH_updateMatchData', {'detail': { checkedinplayers: " +
-                        JSON.stringify(request.detail.checkedinplayers) +
-                        ", timer: " + JSON.stringify(request.detail.timeRemaining)+ " }}));"
+                        code: "document.dispatchEvent(new CustomEvent('FH_updateMatchData', {'detail': { "+
+                        "checkedinplayers: " + JSON.stringify(request.detail.checkedinplayers) +
+                        ", joinedplayers: " + JSON.stringify(request.detail.joinedplayers) +
+                        ", timer: " + JSON.stringify(request.detail.timeRemaining)+ 
+                        ", currentState: " + JSON.stringify(request.detail.currentState)+
+                        ", userid: " + JSON.stringify(request.detail.userid)+
+                        " }}));"
                     });
                 }
             });

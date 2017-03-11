@@ -9,7 +9,7 @@ var faceitHelper = {
 		autoVeto: false,
         autoJoin: false,
 		premium: false,
-		matchedPlayers: false,
+		queuePlayers: false,
 		showStats: false,
 		arrayMapOrder: {},
 		BlackList: false
@@ -31,14 +31,14 @@ var faceitHelper = {
 			}
 		},
 		{
-			id: "btnMatchedPlayers",
+			id: "btnqueuePlayers",
 			icon: "icon-ic_navigation_party_48px",
 			text: "Show Matched Players ",
-			stateId: "sMatchedPlayers",
-			settingName: "matchedPlayers",
+			stateId: "squeuePlayers",
+			settingName: "queuePlayers",
 			action: function() {
-				faceitHelper.userSettings.matchedPlayers = !faceitHelper.userSettings.matchedPlayers;
-				localStorage.bMatchedPlayers = faceitHelper.userSettings.matchedPlayers;
+				faceitHelper.userSettings.queuePlayers = !faceitHelper.userSettings.queuePlayers;
+				localStorage.bqueuePlayers = faceitHelper.userSettings.queuePlayers;
 
 				faceitHelper.updateButtons();
 			}
@@ -120,8 +120,6 @@ var faceitHelper = {
             if($('#btnPremium').length == 0) {
             	faceitHelper.createButtons();
             }
-            //Contact me.
-            localStorage.bMatchedPlayers = true;
 			if(localStorage.bPremium == "true") {
 				faceitHelper.$scope.$on('USER_LOGGED_IN', function() {
 				    faceitHelper.$scope.$root.currentUser.membership.type = "premium";
@@ -143,23 +141,31 @@ var faceitHelper = {
     	faceitHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
     showNotification: function() {
-    	document.dispatchEvent(new CustomEvent('FH_request', {
-	        detail:  { match : angular.element('.queue--sm').scope().quickMatch.match_id }
-	    }));
+    	if(faceitHelper.globalstate.get.user() != "CHECK_IN") {
+    		return;
+    	}
+    	faceitHelper.sendNotification('<h2 class="text-primary">Please check your new tab for</h2><Strong>Showing matched player</strong>');
+    	setTimeout(function() {
+    		document.dispatchEvent(new CustomEvent('FH_request', {
+	        	detail:  { match : angular.element('.queue--sm').scope().quickMatch.match_id }
+	    	}));
+    	}, 1200);
 	},
 	sendMatchData: function() {
-		var joinedList = angular.element('.queue--sm').scope().quickMatch.joined_players;
-		var checkedList = angular.element('.queue--sm').scope().quickMatch.checkedin_players;
+		var quickMatch = angular.element('.queue--sm').scope().quickMatch;
+
+		var joinedList = quickMatch.joined_players;
+		var checkedList = quickMatch.checkedin_players;
 		var timer = $('countdown-timer > div > timer > span').text();
-		if(!joinedList || !checkedList || !timer) {
-			return;
-		}
+		var userid = quickMatch.user_id;
 		document.dispatchEvent(new CustomEvent('FH_sendMatchData', {
 	        detail:  
 	        	{
 		        	joined_players : joinedList,
 		        	checkedin_players: checkedList,
-		        	timeRemaining: timer
+		        	timeRemaining: timer,
+		        	currentState: faceitHelper.globalstate.get.user(),
+		        	userid: userid
 	    		}
 	    }));
 	},
@@ -257,10 +263,10 @@ var faceitHelper = {
     loadUserSettingsFromStorage: function() {
         // Move to userSettings at top
 		faceitHelper.userSettings.autoAccept = (localStorage.bAutoAccept == "true") ? true : false;
-		faceitHelper.userSettings.autoCopy = (localStorage.bAutoCopy == "true") ? true : false;
+		faceitHelper.userSettings.autoCopy = (localStorage.bAutoCopy == "false") ? false : true;
 		faceitHelper.userSettings.autoVeto = (localStorage.bAutoVeto == "true") ? true : false;
-		faceitHelper.userSettings.premium = (localStorage.bPremium == "true") ? true : false;
-		faceitHelper.userSettings.matchedPlayers = (localStorage.bMatchedPlayers == "true") ? true : false;
+		faceitHelper.userSettings.premium = (localStorage.bPremium == "false") ? false : true;
+		faceitHelper.userSettings.queuePlayers = (localStorage.bqueuePlayers == "false") ? false : true;
 		faceitHelper.userSettings.autoJoin = (localStorage.bAutoJoin == "true") ? true : false;
 		faceitHelper.userSettings.showStats = (localStorage.bShowStats == "true") ? true : false;
 		// Chrome extension option
@@ -298,17 +304,17 @@ var faceitHelper = {
 		}
 	},
     timerCheckAcceptedPlayers: function(currentState) {
-		if(currentState != "CHECK_IN" && currentState != "WAITING") {
-			return;
-		}
+		// if(currentState != "CHECK_IN" && currentState != "WAITING") {
+		// 	return;
+		// }
 		var timer = setInterval(function() {
+			faceitHelper.sendMatchData();
+			faceitHelper.debug.log("timerCheckAcceptedPlayers is looping for accepted players...");
 			if(currentState != faceitHelper.globalstate.user.currentState) {
 				faceitHelper.debug.log("State Change detected! Exiting the loop...")
 				clearInterval(timer);
 				return;
 			}
-			faceitHelper.sendMatchData();
-			faceitHelper.debug.log("timerCheckAcceptedPlayers is looping for accepted players...");
 		}, 500);
 	},
     joinTimer: function(duration, serverIP) {
@@ -479,12 +485,11 @@ var faceitHelper = {
 			// This function will be called when user stage changed from one to another
 			faceitHelper.debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
 			if(currentState == "CHECK_IN" || currentState == "WAITING") {
-				if(faceitHelper.userSettings.matchedPlayers) {
-					faceitHelper.sendNotification('<h2 class="text-primary">Please check your new tab</h2><Strong>Show matched player</strong>');
+				if(faceitHelper.userSettings.queuePlayers) {
 					setTimeout(function() {
 						faceitHelper.showNotification();
 						faceitHelper.timerCheckAcceptedPlayers(currentState);
-					}, 1500);
+					}, 100);
 				}
 			}
 
@@ -507,7 +512,7 @@ var faceitHelper = {
 			if(currentState == "CHECK_IN") {
 				if(faceitHelper.userSettings.autoAccept && !faceitHelper.userSettings.BlackList) {
 					faceitHelper.acceptMatch();
-				} else if (faceitHelper.userSettings.autoAccept && (faceitHelper.userSettings.BlackList && faceitHelper.userSettings.matchedPlayers)){
+				} else if (faceitHelper.userSettings.autoAccept && (faceitHelper.userSettings.BlackList && faceitHelper.userSettings.queuePlayers)){
 					faceitHelper.sendNotification('<span class="text-info"><strong>Player Blacklist enabled</strong><br>Waiting for player list before accept...</span>');
 				}
 			}
@@ -891,7 +896,7 @@ var faceitHelper = {
 						// Our targered users for this loop
 							var flag_style = $(matchPlayers[j]).find('.match-team-member__details').hasClass('match-team-member__details--right') ? "left:initial;right:0;" : "right:initial;left:0;";
 							$(matchPlayers[j]).find('.match-team-member__details__skill')
-								.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+faceitHelper.lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: faceitHelper.lobbyStats.data[key].country_flag, class: "flag flag--16 skill-icon", onerror: "faceitHelper.imgLoadError(this, 'country')" })));
+								.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+faceitHelper.lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: faceitHelper.lobbyStats.data[key].country_flag, class: "skill-icon", style: "height: 16px", onerror: "faceitHelper.imgLoadError(this, 'country')" })));
 							$(matchPlayers[j]).find('.match-team-member__details__name.ng-scope > span:nth-child(4)')
 								.append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info helper-playerelo" }));
 

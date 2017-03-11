@@ -74,7 +74,9 @@ document.addEventListener('FH_sendMatchData', function(e) {
             detail: { 
                 joinedplayers: e.detail.joined_players, 
                 checkedinplayers: e.detail.checkedin_players,
-                timeRemaining: e.detail.timeRemaining 
+                timeRemaining: e.detail.timeRemaining,
+                currentState: e.detail.currentState,
+                userid: e.detail.userid
             }
         }
     );
