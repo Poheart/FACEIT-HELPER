@@ -499,10 +499,8 @@ var faceitHelper = {
 			faceitHelper.debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
 			if(currentState == "CHECK_IN" || currentState == "IN_QUEUE" || currentState == "WAITING") {
 				setTimeout(function() {
-					if(faceitHelper.userSettings.queuePlayers) {
-						faceitHelper.showNotification();
-						faceitHelper.timerCheckAcceptedPlayers(currentState);
-					}
+					faceitHelper.showNotification();
+					faceitHelper.timerCheckAcceptedPlayers(currentState);
 					if(currentState != "IN_QUEUE") {
 						faceitHelper.appendButton();
 					}
