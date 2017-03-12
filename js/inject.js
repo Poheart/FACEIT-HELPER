@@ -140,15 +140,23 @@ var faceitHelper = {
     	acceptBtn.click();
     	faceitHelper.sendNotification('<span class="text-info"><strong>has accepted the match for you</span></strong>');
 	},
+	appendButton: function() {
+		if ($('.faceithelper-viewplayers').length > 0) {
+		    return;
+		}
+		$('.modal-dialog__actions').append('<hr><button class="btn btn-default faceithelper-viewplayers">SHOW MATCHED PLAYERS</button>');
+		$('.faceithelper-viewplayers').click(function() {
+	    	faceitHelper.createTabWithMatchID(angular.element('.queue--sm').scope().quickMatch.match_id, true);
+	    	faceitHelper.sendNotification("<small>Information should now displayed on your active tab</small>");
+	    });
+	},
     showNotification: function() {
     	if(faceitHelper.globalstate.get.user() != "CHECK_IN") {
     		return;
     	}
     	faceitHelper.sendNotification('<h2 class="text-primary">Please check your new tab for</h2><Strong>Showing matched player</strong>');
     	setTimeout(function() {
-    		document.dispatchEvent(new CustomEvent('FH_request', {
-	        	detail:  { match : angular.element('.queue--sm').scope().quickMatch.match_id }
-	    	}));
+    		faceitHelper.createTabWithMatchID(angular.element('.queue--sm').scope().quickMatch.match_id, false);
     	}, 1200);
 	},
 	sendMatchData: function() {
@@ -156,7 +164,7 @@ var faceitHelper = {
 
 		var joinedList = quickMatch.joined_players;
 		var checkedList = quickMatch.checkedin_players;
-		var timer = $('countdown-timer > div > timer > span').text();
+		var timer = Math.floor(angular.element('.queue--sm').scope().queueJoinedEpoch / 1000);
 		var userid = quickMatch.user_id;
 		document.dispatchEvent(new CustomEvent('FH_sendMatchData', {
 	        detail:  
@@ -315,7 +323,7 @@ var faceitHelper = {
 				clearInterval(timer);
 				return;
 			}
-		}, 500);
+		}, currentState == "IN_QUEUE" ? 1500 : 500);
 	},
     joinTimer: function(duration, serverIP) {
 	    var timer = duration, minutes, seconds;
@@ -451,6 +459,11 @@ var faceitHelper = {
 		return skill_label;
 
 	},
+	createTabWithMatchID: function(matchID, shouldFocus = false) {
+		document.dispatchEvent(new CustomEvent('FH_request', {
+	        	detail:  { match : matchID, forceFocus: shouldFocus }
+	    }));
+	},
     debug: {
 		log: function(msg) {
 			if(faceitHelper.userSettings.debugMode) {
@@ -484,13 +497,16 @@ var faceitHelper = {
 		OnUserStateChange: function(currentState, lastState) {
 			// This function will be called when user stage changed from one to another
 			faceitHelper.debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
-			if(currentState == "CHECK_IN" || currentState == "WAITING") {
-				if(faceitHelper.userSettings.queuePlayers) {
-					setTimeout(function() {
+			if(currentState == "CHECK_IN" || currentState == "IN_QUEUE" || currentState == "WAITING") {
+				setTimeout(function() {
+					if(faceitHelper.userSettings.queuePlayers) {
 						faceitHelper.showNotification();
 						faceitHelper.timerCheckAcceptedPlayers(currentState);
-					}, 100);
-				}
+					}
+					if(currentState != "IN_QUEUE") {
+						faceitHelper.appendButton();
+					}
+				}, 100);
 			}
 
 			// Perform action when under certain conditional
@@ -499,7 +515,7 @@ var faceitHelper = {
 					// Save user current region for later server veto implementation
 					faceitHelper.globalstate.user.region = angular.element('.queue--sm').scope().quickMatch.region;
 					faceitHelper.hideAddedToQueueDialogBox();
-				}, 200);
+				}, 100);
 
 				if(lastState == "MATCH") {
 					faceitHelper.sendNotification('<span class="text-danger"><strong>will now refresh page to prevent match accept bug</strong><hr>Attempting page refresh now...</span>');

@@ -46,27 +46,39 @@ chrome.storage.sync.get({
     localStorage.BlackList = items.blacklist_textarea;
 });
 
+
+
+/*
+    Document Event Listener
+*/
+// Copy the passed variables to clipboard
 document.addEventListener('FH_copyServerIP', function(e) {
     copyToClipboard(e.detail.serverIP);
 });
 
+// Click accept button on faceit.com window
 document.addEventListener('FH_acceptMatch', function() {
     chrome.runtime.sendMessage(
         {method:"accept-match"}
     );
 });
 
-
+// Closing current action tab window
 document.addEventListener('FH_closeWindow', function() {
     chrome.runtime.sendMessage(
         {method:"closeWindow"}
     );
 });
+
+// Creating a new tab with match id
 document.addEventListener('FH_request', function(e) {
+    console.log("force fouc is : " + e.detail.forceFocus);
     chrome.runtime.sendMessage(
-        {method: "openpage", detail: e.detail.match}
+        {method: "openpage", detail: e.detail.match, forceFocus: e.detail.forceFocus }
     );
 });
+
+// Match information relay to faceit helper website
 document.addEventListener('FH_sendMatchData', function(e) {
     chrome.runtime.sendMessage(
         {
@@ -82,7 +94,9 @@ document.addEventListener('FH_sendMatchData', function(e) {
     );
 });
 
-
+/*
+    Snippet
+*/
 var copyToClipboard = function( text ){
     var copyDiv = document.createElement('div');
     copyDiv.contentEditable = true;
