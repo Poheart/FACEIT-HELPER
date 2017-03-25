@@ -42,13 +42,15 @@ chrome.runtime.onMessage.addListener(
                     console.log(results[0].url + " vs " + request.detail);
                     if(results[0].url == 'https://www.poheart.net/room/' + request.detail) {
                         chrome.tabs.update(results[0].id, {
-                            active: request.forceFocus
+                            active: request.forceFocus,
+                            highlighted: request.forceFocus
                         });
                     } else {
                     // When a page found but not the same match ID, update to new page
                         chrome.tabs.update(results[0].id, {
                             url: 'https://www.poheart.net/room/' + request.detail,
-                            active: request.forceFocus
+                            active: request.forceFocus,
+                            highlighted: request.forceFocus
                         });
                     }
                 }

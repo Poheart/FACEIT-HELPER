@@ -31,19 +31,6 @@ var faceitHelper = {
 			}
 		},
 		{
-			id: "btnqueuePlayers",
-			icon: "icon-ic_navigation_party_48px",
-			text: "Show Matched Players ",
-			stateId: "squeuePlayers",
-			settingName: "queuePlayers",
-			action: function() {
-				faceitHelper.userSettings.queuePlayers = !faceitHelper.userSettings.queuePlayers;
-				localStorage.bqueuePlayers = faceitHelper.userSettings.queuePlayers;
-
-				faceitHelper.updateButtons();
-			}
-		},
-		{
 			id: "btnAutoAccept",
 			icon: "icon-ic_check_generic",
 			text: "Auto-Accept ",
@@ -498,13 +485,6 @@ var faceitHelper = {
 			// This function will be called when user stage changed from one to another
 			faceitHelper.debug.log("eventStage CURRENT USERSTATE:" + currentState + " & LAST:" + lastState);
 			if(currentState == "CHECK_IN" || currentState == "IN_QUEUE" || currentState == "WAITING") {
-				setTimeout(function() {
-					faceitHelper.showNotification();
-					faceitHelper.timerCheckAcceptedPlayers(currentState);
-					if(currentState != "IN_QUEUE") {
-						faceitHelper.appendButton();
-					}
-				}, 100);
 			}
 
 			// Perform action when under certain conditional
@@ -602,7 +582,7 @@ var faceitHelper = {
 			}
 
 			if (currentState == "ongoing") {
-				faceitHelper.sendNotification('<h2><span class="text-success"><strong>GL & HF!</span></strong></h2>');
+				faceitHelper.sendNotification('<h2><span class="text-primary"><strong>GL & HF!</span></strong></h2>');
 				$("#joinWarning").remove();
 			}
 
@@ -1037,6 +1017,7 @@ document.addEventListener('FH_returnMapsPreference', function(e) {
 
 document.addEventListener('FH_acceptActiveTab', function() {
 	faceitHelper.sendNotification("Remote accept match");
+	//angular.element('.queue--sm').scope().checkIn();
 	faceitHelper.acceptMatch();
 });
 
