@@ -154,7 +154,7 @@ var faceitHelper = {
 		var timer = Math.floor(angular.element('.queue--sm').scope().queueJoinedEpoch / 1000);
 		var userid = quickMatch.user_id;
 		document.dispatchEvent(new CustomEvent('FH_sendMatchData', {
-	        detail:  
+	        detail:
 	        	{
 		        	joined_players : joinedList,
 		        	checkedin_players: checkedList,
@@ -563,7 +563,7 @@ var faceitHelper = {
 							faceitHelper.debug.log("[API]Looping for live server players...");
 						}, 1000 * 5);
 
-						
+
 					}
 				}
 
@@ -890,11 +890,11 @@ var faceitHelper = {
 						// Our targered users for this loop
 							var flag_style = $(matchPlayers[j]).find('.match-team-member__details').hasClass('match-team-member__details--right') ? "left:initial;right:0;" : "right:initial;left:0;";
 							$(matchPlayers[j]).find('.match-team-member__details__skill')
-								.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+faceitHelper.lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: faceitHelper.lobbyStats.data[key].country_flag, class: "skill-icon", style: "height: 16px", onerror: "faceitHelper.imgLoadError(this, 'country')" })));
+								.after($('<div>', { class: "match-team-member__details__skill player_flag faction"+faceitHelper.lobbyStats.data[key].fraction, style: flag_style }).append($('<img>', { src: faceitHelper.lobbyStats.data[key].country_flag, class: "skill-icon", style: "height: 16px", onerror: "faceitHelper.imgLoadError(this, 'country')", title: faceitHelper.lobbyStats.data[key].country.toUpperCase() })));
 							$(matchPlayers[j]).find('div.match-team-member__details__name.re.ng-scope').find('[class="ng-scope"]')
 								.append($('<strong>', { text: "ELO: " + faceitHelper.lobbyStats.data[key].elo, class: "text-info helper-playerelo" }));
 
-								
+
 
 							$(matchPlayers[j]).find('.skill-icon.ng-scope').attr({src: faceitHelper.lobbyStats.data[key].skill_level , onerror: "faceitHelper.imgLoadError(this, 'skills')"});
 							var partyid = faceitHelper.lobbyStats.data[key].party_id;
